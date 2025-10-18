@@ -1,264 +1,92 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
-// Sample stories, vocabulary, sight words, and questions for 2nd grade reading
-const stories = [
-  {
-    id: 1,
-    title: "The Happy Dog",
-    text: "The dog runs very fast. It loves to play in the park.",
-    audio: null, // placeholder for future audio file URL if needed
-    vocab: ["dog", "runs", "park"],
-    questions: [
-      {
-        question: "Where does the dog love to play?",
-        choices: ["The park", "The house", "The school"],
-        answer: "The park"
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: "A Day at the Farm",
-    text: "The cow gives milk. The farm has many animals.",
-    audio: null,
-    vocab: ["cow", "milk", "farm", "animals"],
-    questions: [
-      {
-        question: "What does the cow give?",
-        choices: ["Milk", "Eggs", "Honey"],
-        answer: "Milk"
-      }
-    ]
-  }
+// Every 2nd grade reading word from your charts
+const readingWords = [
+  "this","here","find","me","that","no","work","come","how","help","day","what","down","case","ever","two","same","said","new","an","baseball","factory","learned","felt","sold","midnight","party","below","horn","rush","ground","fixed","idea","ring","east","sand","thanks","deck","receiving","half","building","plant","desk","alone","worn","mean","week","sleep","grip","draw","repeat","pat","motion","bed","rest","pair","black","trip","gate","trap","opening","ready","having","try","raise","trade","paint","everything","goods","pack","sight","root","behind","height","lips","blood","memory","sudden","perform","river","air","hole","mine","bag","powerful","afternoon","beauty","clock","envelope","sale","friend","sky","free","date","smile","meaning","park","sink","needs","sum","kept","cap","hard","fishing","hill","tonight","hidden","perhaps","dog","speaker","arrive","ladies","wild","buy","track","chair","sister","human","inch","split","loves","pound","cream","row","partner","slip","winning","football","fool","kitchen","all","number","same","how","one","case","get","find","just","with","still","had","the","why","over","against","we","never","to","back","book","favor","net","split","complete","crowd","hung","baseball","funny","soft","terrible","double","addition","pocket","drop","march","receive","warning","shadow","empty","desk","shot","kind","darkness","calendar","pick","city","hall","tiny","solve","chest","fight","silver","thanks","went","snow","bag","mail","pink","write","married","motor","bent","able","blind","gift","size","build","wooden","wall","inch","trade","sweet","color","pilot","award","dog","musical","change","top","deep","silence","wake","worn","eight","air","load","harm","page","coffee","tie","lane","chicken","happen","ahead","act","alive","large","body","mixture","forward","winning","plane","mile","wife","acting","fire","solid","ball","breakfast","sound","yourself","stretch","anger","coat","hat","mystery","husband","sing","born","milk","envelope","highway","anything","strong","throw","match","seeing","grow","save"
 ];
 
-const sightWords = ["the", "and", "it", "has", "in", "to", "a", "of"];
+// Shuffle function for variety each session
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const shuffledSet = () => shuffle(readingWords);
 
 function ReadingModule() {
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
-  const [showVocab, setShowVocab] = useState(false);
-  const [currentVocabIndex, setCurrentVocabIndex] = useState(0);
-  const [showQuestions, setShowQuestions] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedChoice, setSelectedChoice] = useState(null);
-  const [score, setScore] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [wordList, setWordList] = useState(shuffledSet());
   const [message, setMessage] = useState('');
-  const [sightWordIndex, setSightWordIndex] = useState(0);
-  const [sightWordInput, setSightWordInput] = useState('');
-  const [sightWordMsg, setSightWordMsg] = useState('');
-  const audioRef = useRef(null);
-  const [highlightIndex, setHighlightIndex] = useState(0);
 
-  const currentStory = stories[currentStoryIndex];
-  const currentVocabWord = showVocab ? currentStory.vocab[currentVocabIndex] : null;
-  const currentQuestion = showQuestions ? currentStory.questions[currentQuestionIndex] : null;
-
-  // Read-along: highlight word by word
-  const wordsArray = currentStory.text.split(" ");
-  useEffect(() => {
-    if (!showVocab && !showQuestions) {
-      setHighlightIndex(0);
-      const timer = setInterval(() => {
-        setHighlightIndex((idx) => {
-          if (idx < wordsArray.length - 1) return idx + 1;
-          clearInterval(timer);
-          return idx;
-        });
-      }, 500);
-      return () => clearInterval(timer);
-    }
-  }, [currentStoryIndex, showVocab, showQuestions]);
-
-  // Speech synthesis for read-along
-  function playStoryAudio() {
+  function speakWord(word) {
     if ('speechSynthesis' in window) {
-      const utter = new SpeechSynthesisUtterance(currentStory.text);
+      const utter = new window.SpeechSynthesisUtterance(word);
       window.speechSynthesis.speak(utter);
     }
   }
 
-  // Vocabulary flashcards
-  function nextVocab() {
-    if (currentVocabIndex < currentStory.vocab.length - 1) {
-      setCurrentVocabIndex(currentVocabIndex + 1);
+  function nextWord() {
+    setShowAnswer(false);
+    if (index < wordList.length - 1) {
+      setIndex(index + 1);
     } else {
-      setShowVocab(false);
-      setShowQuestions(true);
-      setCurrentQuestionIndex(0);
+      setMessage("🎉 Great job! You've practiced them all! Shuffle for more.");
     }
   }
 
-  // Questions
-  function selectChoice(choice) {
-    setSelectedChoice(choice);
-  }
-  function checkAnswer() {
-    if (selectedChoice === currentQuestion.answer) {
-      setScore(score + 1);
-      setMessage("Correct! Great job!");
-      setTimeout(() => {
-        setMessage('');
-        if (currentQuestionIndex < currentStory.questions.length - 1) {
-          setCurrentQuestionIndex(currentQuestionIndex + 1);
-          setSelectedChoice(null);
-        } else {
-          setShowQuestions(false);
-          setSelectedChoice(null);
-          setMessage('');
-        }
-      }, 1000);
-    } else {
-      setMessage("Try again!");
+  function prevWord() {
+    setShowAnswer(false);
+    if (index > 0) {
+      setIndex(index - 1);
     }
   }
 
-  // Sight words practice
-  function checkSightWord() {
-    if (sightWordInput.toLowerCase() === sightWords[sightWordIndex]) {
-      setSightWordMsg("Good job!");
-      setSightWordInput('');
-      setTimeout(() => {
-        setSightWordMsg('');
-        if (sightWordIndex < sightWords.length - 1) {
-          setSightWordIndex(sightWordIndex + 1);
-        } else {
-          setSightWordIndex(0);
-        }
-      }, 1000);
-    } else {
-      setSightWordMsg("Try again.");
-    }
+  function reshuffleWords() {
+    setWordList(shuffledSet());
+    setIndex(0);
+    setShowAnswer(false);
+    setMessage('');
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-300 via-yellow-300 to-green-400 p-6 font-sans">
-      <h2 className="text-4xl font-extrabold mb-6 text-center text-white drop-shadow">📚 2nd Grade Reading</h2>
-
-      {/* Story Title */}
-      <h3 className="text-2xl font-bold mb-3 text-center text-white">{currentStory.title}</h3>
-
-      {/* Read-along Story Text with highlight */}
-      {!showVocab && !showQuestions && (
-        <>
-          <p className="text-lg text-white mb-4">
-            {wordsArray.map((word, idx) => (
-              <span
-                key={idx}
-                className={idx === highlightIndex ? "bg-yellow-300 text-black px-1" : ""}
-              >
-                {word + " "}
-              </span>
-            ))}
-          </p>
-          <button
-            onClick={playStoryAudio}
-            className="mb-5 bg-yellow-400 px-6 py-2 rounded-full font-bold shadow hover:bg-yellow-500 transition"
-          >
-            🔊 Listen to story
-          </button>
-          <button
-            onClick={() => setShowVocab(true)}
-            className="mb-8 bg-pink-500 px-6 py-2 rounded-full font-bold shadow hover:bg-pink-600 transition"
-          >
-            Vocabulary Flashcards
-          </button>
-        </>
-      )}
-
-      {/* Vocabulary Flashcards */}
-      {showVocab && (
-        <div className="bg-white rounded-xl p-6 max-w-md mx-auto shadow-lg text-center">
-          <h4 className="text-xl font-extrabold mb-4">Word: {currentVocabWord}</h4>
-          <button
-            onClick={() => playStoryAudio(currentVocabWord)}
-            className="bg-cyan-400 hover:bg-cyan-600 text-white rounded-full px-4 py-2 mb-4 font-bold"
-          >
-            🔊 Hear Word
-          </button>
-          <button
-            onClick={nextVocab}
-            className="bg-purple-500 hover:bg-purple-700 text-white rounded-full px-6 py-2 font-semibold"
-          >
-            Next Word →
-          </button>
-        </div>
-      )}
-
-      {/* Comprehension Questions */}
-      {showQuestions && (
-        <div className="bg-white rounded-xl p-6 max-w-md mx-auto shadow-lg text-center">
-          <h4 className="text-xl font-extrabold mb-4">Question:</h4>
-          <p className="mb-4 text-lg font-semibold">{currentQuestion.question}</p>
-          <div className="flex flex-col gap-3 mb-4">
-            {currentQuestion.choices.map((c, i) => (
-              <button
-                key={i}
-                onClick={() => selectChoice(c)}
-                className={`rounded-full px-4 py-2 font-semibold ${
-                  selectedChoice === c ? "bg-yellow-400 text-black" : "bg-gray-300"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={checkAnswer}
-            disabled={!selectedChoice}
-            className="bg-green-500 hover:bg-green-700 px-6 py-2 text-white rounded-full font-bold disabled:opacity-50"
-          >
-            Check Answer
-          </button>
-          <p className="mt-4 text-red-700 font-bold min-h-[1.5em]">{message}</p>
-        </div>
-      )}
-
-      {/* Sight Word Practice */}
-      {!showVocab && !showQuestions && (
-        <div className="max-w-md mx-auto mt-8 bg-white p-6 rounded-xl shadow-lg text-center">
-          <h4 className="text-xl font-extrabold mb-4">Sight Word Practice</h4>
-          <p className="text-lg mb-4">Spell the sight word:</p>
-          <p className="text-2xl font-bold mb-4">{sightWords[sightWordIndex]}</p>
-          <input
-            value={sightWordInput}
-            onChange={e => setSightWordInput(e.target.value)}
-            className="border-2 border-cyan-500 rounded-xl w-full px-4 py-2 mb-4 text-center text-lg font-semibold"
-            placeholder="Type the word here"
-            aria-label="Type sight word"
-            autoFocus
-          />
-          <button
-            onClick={checkSightWord}
-            className="bg-cyan-500 hover:bg-cyan-700 text-white rounded-full px-6 py-2 font-bold"
-          >
-            Check
-          </button>
-          <p className="mt-3 min-h-[1.5em] font-bold text-purple-700">{sightWordMsg}</p>
-        </div>
-      )}
-
-      {/* Navigation Buttons for Stories */}
-      <div className="flex justify-between max-w-md mx-auto mt-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-100 via-yellow-100 to-pink-100 p-6 font-sans">
+      <h2 className="text-4xl md:text-5xl font-extrabold mb-6 text-green-700 tracking-tight text-center">📚 2nd Grade Reading Words</h2>
+      <div className="bg-white rounded-3xl shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
+        <div className="mb-4 text-3xl font-black text-blue-700 min-h-[2.5em]">{wordList[index]}</div>
         <button
-          className="bg-gray-400 px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60"
-          disabled={currentStoryIndex === 0}
-          onClick={() => setCurrentStoryIndex(currentStoryIndex - 1)}
+          onClick={() => speakWord(wordList[index])}
+          className="mb-6 bg-green-400 hover:bg-green-600 text-white rounded-full px-6 py-2 font-bold shadow transition"
         >
-          ← Previous Story
+          🔊 Hear Word
         </button>
+        <div className="flex gap-4 mb-6 w-full">
+          <button
+            onClick={prevWord}
+            disabled={index === 0}
+            className="bg-gray-400 text-white px-4 py-2 rounded-lg font-bold w-1/2 disabled:opacity-50"
+          >
+            ← Previous
+          </button>
+          <button
+            onClick={nextWord}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold w-1/2"
+          >
+            Next →
+          </button>
+        </div>
         <button
-          className="bg-gray-400 px-4 py-2 rounded-lg font-bold text-white disabled:opacity-60"
-          disabled={currentStoryIndex === stories.length - 1}
-          onClick={() => {
-            setCurrentStoryIndex(currentStoryIndex + 1);
-            setShowVocab(false);
-            setShowQuestions(false);
-            setSelectedChoice(null);
-            setMessage('');
-          }}
+          onClick={reshuffleWords}
+          className="mt-2 bg-purple-400 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold shadow"
         >
-          Next Story →
+          🔀 Shuffle
         </button>
+        <div className="mt-6 text-green-700 min-h-[2em] text-center font-extrabold">{message}</div>
+        <div className="mt-6 text-center text-gray-500 text-xs">Word {index + 1} of {wordList.length}</div>
       </div>
     </div>
   );
