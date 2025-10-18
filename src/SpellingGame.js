@@ -27,8 +27,17 @@ function SpellingGame({ selectedVoice }) {
   // State variables
   const [section, setSection] = useState("rootPractice");
   const [shuffledWords, setShuffledWords] = useState([]);
-  const [voices, setVoices] = useState([]);
-  const [selectedVoice, setSelectedVoice] = useState('');
+  const [rootIndex, setRootIndex] = useState(0);
+  const [rootInput, setRootInput] = useState('');
+  const [rootComplete, setRootComplete] = useState(Array(words.length).fill(false));
+  const [rootMsg, setRootMsg] = useState('');
+  const [current, setCurrent] = useState(0);
+  const [input, setInput] = useState('');
+  const [showHint, setShowHint] = useState(false);
+  const [score, setScore] = useState(0);
+  const [message, setMessage] = useState('');
+  const [speakOnStart, setSpeakOnStart] = useState(true);
+  const [completed, setCompleted] = useState(Array(words.length).fill(false));
 
   // Root Practice state
   const [rootIndex, setRootIndex] = useState(0);
@@ -45,13 +54,13 @@ function SpellingGame({ selectedVoice }) {
   const [speakOnStart, setSpeakOnStart] = useState(true);
   const [completed, setCompleted] = useState(Array(words.length).fill(false));
 
-  // Helper variables (always defined!)
+  // Helper variables
   const wordObj = shuffledWords.length > 0 ? shuffledWords[current] : null;
   const fullWord = wordObj ? (wordObj.suffix || wordObj.root) : "";
   const rootObj = shuffledWords.length > 0 ? shuffledWords[rootIndex] : null;
   const rootWord = rootObj ? rootObj.root : "";
 
-  // SHUFFLE on mount
+  // Shuffle on mount
   useEffect(() => {
     setShuffledWords(shuffleList(words));
     setRootIndex(0);
@@ -67,47 +76,44 @@ function SpellingGame({ selectedVoice }) {
     setMessage('');
   }, []);
 
-  // VOICE setup
-  useEffect(() => {
-    const populateVoices = () => {
-      const voicesList = window.speechSynthesis.getVoices();
-      setVoices(voicesList);
-      const softFemale = voicesList.find(v =>
-        (v.lang.startsWith('en') && v.name.toLowerCase().includes('female')) ||
-        v.name.toLowerCase().includes('zira') ||
-        v.name.toLowerCase().includes('samantha') ||
-        v.name.toLowerCase().includes('eva')
-      );
-      setSelectedVoice(softFemale ? softFemale.name : voicesList[0]?.name);
-    };
-    window.speechSynthesis.onvoiceschanged = populateVoices;
-    populateVoices();
-  }, []);
-
-  // TEST: Read the word at start of each round
-  useEffect(() => {
-    if (
-      section === "test" &&
-      speakOnStart && shuffledWords.length > 0 && wordObj
-    ) {
-      readWord();
-      setSpeakOnStart(false);
-    }
-    // eslint-disable-next-line
-  }, [current, shuffledWords, section, wordObj, speakOnStart]);
-
-  // --- Voice handling ---
-  function getVoiceByName(name) {
-    return voices.find(v => v.name === name);
-  }
+  // --- Voice handling using selectedVoice from props ---
   function playWordAudio(word) {
-  if ('speechSynthesis' in window) {
-    const utter = new SpeechSynthesisUtterance(word);
-    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-    if (voice) utter.voice = voice;
-    window.speechSynthesis.speak(utter);
+    if ('speechSynthesis' in window) {
+      const utter = new window.SpeechSynthesisUtterance(word);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    }
   }
-}
+
+  function readWord() {
+    if ('speechSynthesis' in window) {
+      const utter = new window.SpeechSynthesisUtterance(`Spell ${fullWord}`);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  function readSentence() {
+    if ('speechSynthesis' in window) {
+      const utter = new window.SpeechSynthesisUtterance(wordObj.sentence);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  function spellingBeeRecap(word) {
+    const lettersSpaced = word.toUpperCase().split('').join('... ');
+    const recapText = `Correct, ${word}. ${lettersSpaced}. ${word}.`;
+    if ('speechSynthesis' in window) {
+      const utter = new window.SpeechSynthesisUtterance(recapText);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    }
+  }
 
   // --- Root Practice Logic ---
   function handleRootInput(e) {
@@ -120,7 +126,6 @@ function SpellingGame({ selectedVoice }) {
       setRootComplete(nextComplete);
       setRootMsg("✅ Great spelling! Click 'Next' or try again.");
       setTimeout(() => {
-        // Advance or enter preview if done
         if (rootIndex < shuffledWords.length - 1) {
           setRootIndex(rootIndex + 1);
           setRootInput('');
