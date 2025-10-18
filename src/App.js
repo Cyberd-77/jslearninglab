@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SpellingGame from './SpellingGame';
 import MathModule from './MathModule';
 import ReadingModule from './ReadingModule';
+import FindTheWordGame from './FindTheWordGame';
 
 export default function App() {
   const [subject, setSubject] = useState(null);
@@ -88,6 +89,7 @@ export default function App() {
       {subject === 'spelling' && <SpellingGame selectedVoice={selectedVoice} />}
       {subject === 'math' && <MathModule selectedVoice={selectedVoice} />}
       {subject === 'reading' && <ReadingModule selectedVoice={selectedVoice} />}
+      {subject === 'findword' && <FindTheWordGame selectedVoice={selectedVoice} />}
     </div>
   );
 }
