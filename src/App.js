@@ -16,24 +16,28 @@ export default function App() {
   if (!subject) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.default} font-sans p-6`}>
-        <h1 className="text-white text-5xl font-extrabold mb-12 drop-shadow">Jslearning Lab</h1>
-        <p className="text-white mb-6 text-lg">Choose a subject to begin learning:</p>
-        <div className="flex gap-8">
+        <h1 className="text-white text-4xl md:text-5xl font-extrabold mb-8 md:mb-12 drop-shadow text-center">
+          Jslearning Lab
+        </h1>
+        <p className="text-white mb-6 text-lg text-center">
+          Choose a subject to begin learning:
+        </p>
+        <div className="flex flex-col gap-6 items-center w-full max-w-xs mx-auto md:flex-row md:max-w-none md:gap-8 md:justify-center">
           <button
             onClick={() => setSubject('spelling')}
-            className="bg-pink-400 hover:bg-pink-600 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition"
+            className="bg-pink-400 hover:bg-pink-600 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
           >
             📝 Spelling
           </button>
           <button
             onClick={() => setSubject('math')}
-            className="bg-blue-400 hover:bg-blue-600 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition"
+            className="bg-blue-400 hover:bg-blue-600 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
           >
             🔢 Math
           </button>
           <button
             onClick={() => setSubject('reading')}
-            className="bg-green-500 hover:bg-green-700 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition"
+            className="bg-green-500 hover:bg-green-700 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
           >
             📚 Reading
           </button>
