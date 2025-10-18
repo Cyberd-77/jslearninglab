@@ -27,17 +27,6 @@ function SpellingGame({ selectedVoice }) {
   // State variables
   const [section, setSection] = useState("rootPractice");
   const [shuffledWords, setShuffledWords] = useState([]);
-  const [rootIndex, setRootIndex] = useState(0);
-  const [rootInput, setRootInput] = useState('');
-  const [rootComplete, setRootComplete] = useState(Array(words.length).fill(false));
-  const [rootMsg, setRootMsg] = useState('');
-  const [current, setCurrent] = useState(0);
-  const [input, setInput] = useState('');
-  const [showHint, setShowHint] = useState(false);
-  const [score, setScore] = useState(0);
-  const [message, setMessage] = useState('');
-  const [speakOnStart, setSpeakOnStart] = useState(true);
-  const [completed, setCompleted] = useState(Array(words.length).fill(false));
 
   // Root Practice state
   const [rootIndex, setRootIndex] = useState(0);
@@ -60,7 +49,7 @@ function SpellingGame({ selectedVoice }) {
   const rootObj = shuffledWords.length > 0 ? shuffledWords[rootIndex] : null;
   const rootWord = rootObj ? rootObj.root : "";
 
-  // Shuffle on mount
+  // SHUFFLE on mount
   useEffect(() => {
     setShuffledWords(shuffleList(words));
     setRootIndex(0);
@@ -76,39 +65,22 @@ function SpellingGame({ selectedVoice }) {
     setMessage('');
   }, []);
 
-  // --- Voice handling using selectedVoice from props ---
+  // TEST: Read the word at start of each round
+  useEffect(() => {
+    if (
+      section === "test" &&
+      speakOnStart && shuffledWords.length > 0 && wordObj
+    ) {
+      readWord();
+      setSpeakOnStart(false);
+    }
+    // eslint-disable-next-line
+  }, [current, shuffledWords, section, wordObj, speakOnStart]);
+
+  // --- Voice handling ---
   function playWordAudio(word) {
     if ('speechSynthesis' in window) {
       const utter = new window.SpeechSynthesisUtterance(word);
-      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-      if (voice) utter.voice = voice;
-      window.speechSynthesis.speak(utter);
-    }
-  }
-
-  function readWord() {
-    if ('speechSynthesis' in window) {
-      const utter = new window.SpeechSynthesisUtterance(`Spell ${fullWord}`);
-      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-      if (voice) utter.voice = voice;
-      window.speechSynthesis.speak(utter);
-    }
-  }
-
-  function readSentence() {
-    if ('speechSynthesis' in window) {
-      const utter = new window.SpeechSynthesisUtterance(wordObj.sentence);
-      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-      if (voice) utter.voice = voice;
-      window.speechSynthesis.speak(utter);
-    }
-  }
-
-  function spellingBeeRecap(word) {
-    const lettersSpaced = word.toUpperCase().split('').join('... ');
-    const recapText = `Correct, ${word}. ${lettersSpaced}. ${word}.`;
-    if ('speechSynthesis' in window) {
-      const utter = new window.SpeechSynthesisUtterance(recapText);
       const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
       if (voice) utter.voice = voice;
       window.speechSynthesis.speak(utter);
@@ -126,6 +98,7 @@ function SpellingGame({ selectedVoice }) {
       setRootComplete(nextComplete);
       setRootMsg("✅ Great spelling! Click 'Next' or try again.");
       setTimeout(() => {
+        // Advance or enter preview if done
         if (rootIndex < shuffledWords.length - 1) {
           setRootIndex(rootIndex + 1);
           setRootInput('');
@@ -238,28 +211,30 @@ function SpellingGame({ selectedVoice }) {
   // --- Test UI ---
   function readWord() {
     if ('speechSynthesis' in window) {
-    const utter = new SpeechSynthesisUtterance(word);
-    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-    if (voice) utter.voice = voice;
-    window.speechSynthesis.speak(utter);
+      const utter = new window.SpeechSynthesisUtterance(`Spell ${fullWord}`);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    }
   }
-}
   function readSentence() {
     if ('speechSynthesis' in window) {
-    const utter = new SpeechSynthesisUtterance(word);
-    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-    if (voice) utter.voice = voice;
-    window.speechSynthesis.speak(utter);
+      const utter = new window.SpeechSynthesisUtterance(wordObj.sentence);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    }
   }
-}
   function spellingBeeRecap(word) {
+    const lettersSpaced = word.toUpperCase().split('').join('... ');
+    const recapText = `Correct, ${word}. ${lettersSpaced}. ${word}.`;
     if ('speechSynthesis' in window) {
-    const utter = new SpeechSynthesisUtterance(word);
-    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-    if (voice) utter.voice = voice;
-    window.speechSynthesis.speak(utter);
+      const utter = new window.SpeechSynthesisUtterance(recapText);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.speak(utter);
+    }
   }
-}
   function handleInput(e) {
     setInput(e.target.value);
   }
@@ -341,22 +316,6 @@ function SpellingGame({ selectedVoice }) {
           >
             {progressPercent > 10 ? `${progressPercent}%` : ""}
           </div>
-        </div>
-        {/* Voice Select */}
-        <div className="mb-4 w-full">
-          <label className="font-bold mr-2 text-cyan-700">Voice:</label>
-          <select
-            className="rounded-lg px-2 py-1 border-2 border-cyan-500 bg-white text-cyan-900 w-2/3"
-            value={selectedVoice}
-            onChange={e => setSelectedVoice(e.target.value)}
-            aria-label="Select voice"
-          >
-            {voices.map(v =>
-              <option key={v.name} value={v.name}>
-                {v.name}
-              </option>
-            )}
-          </select>
         </div>
         <h3 className="text-2xl text-yellow-500 font-black mb-4 tracking-widest">Please spell the word!</h3>
         <div className="flex flex-wrap justify-center gap-3 mb-4">
