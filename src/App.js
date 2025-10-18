@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SpellingGame from './SpellingGame';
 import MathModule from './MathModule';
 import ReadingModule from './ReadingModule';
 
 export default function App() {
   const [subject, setSubject] = useState(null);
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState('Samantha');
+
+  useEffect(() => {
+    const populateVoices = () => {
+      const voicesList = window.speechSynthesis.getVoices();
+      setVoices(voicesList);
+      const defaultVoice = voicesList.find(v =>
+        v.name === 'Samantha'
+      );
+      setSelectedVoice(defaultVoice ? defaultVoice.name : voicesList[0]?.name);
+    };
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+    populateVoices();
+  }, []);
 
   const backgroundColors = {
     spelling: 'bg-gradient-to-br from-cyan-500 via-pink-400 to-yellow-200',
@@ -19,6 +34,21 @@ export default function App() {
         <h1 className="text-white text-4xl md:text-5xl font-extrabold mb-8 md:mb-12 drop-shadow text-center">
           Jslearning Lab
         </h1>
+        <p className="text-white mb-3 text-lg text-center">
+          Choose your preferred voice:
+        </p>
+        <select
+          className="mb-8 rounded-lg px-2 py-2 border-2 border-cyan-500 bg-white text-cyan-900 w-full max-w-xs mx-auto"
+          value={selectedVoice}
+          onChange={e => setSelectedVoice(e.target.value)}
+          aria-label="Select voice"
+        >
+          {voices.map(v =>
+            <option key={v.name} value={v.name}>
+              {v.name}
+            </option>
+          )}
+        </select>
         <p className="text-white mb-6 text-lg text-center">
           Choose a subject to begin learning:
         </p>
@@ -55,9 +85,9 @@ export default function App() {
         ← Back to Subjects
       </button>
 
-      {subject === 'spelling' && <SpellingGame />}
-      {subject === 'math' && <MathModule />}
-      {subject === 'reading' && <ReadingModule />}
+      {subject === 'spelling' && <SpellingGame selectedVoice={selectedVoice} />}
+      {subject === 'math' && <MathModule selectedVoice={selectedVoice} />}
+      {subject === 'reading' && <ReadingModule selectedVoice={selectedVoice} />}
     </div>
   );
 }

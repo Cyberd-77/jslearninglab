@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function MathModule() {
+function MathModule({ selectedVoice }) {
   const mathProblems = [
     { question: "5 + 3", answer: "8" },
     { question: "7 - 4", answer: "3" },
@@ -36,6 +36,8 @@ function MathModule() {
 
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
+    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+    if (voice) utterance.voice = voice;
     synth.speak(utterance);
   }
 

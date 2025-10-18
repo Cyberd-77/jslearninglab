@@ -23,7 +23,7 @@ function shuffleList(list) {
   return array;
 }
 
-function SpellingGame() {
+function SpellingGame({ selectedVoice }) {
   // State variables
   const [section, setSection] = useState("rootPractice");
   const [shuffledWords, setShuffledWords] = useState([]);
@@ -101,12 +101,13 @@ function SpellingGame() {
     return voices.find(v => v.name === name);
   }
   function playWordAudio(word) {
-    if ('speechSynthesis' in window) {
-      const utter = new window.SpeechSynthesisUtterance(word);
-      utter.voice = getVoiceByName(selectedVoice);
-      window.speechSynthesis.speak(utter);
-    }
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(word);
+    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+    if (voice) utter.voice = voice;
+    window.speechSynthesis.speak(utter);
   }
+}
 
   // --- Root Practice Logic ---
   function handleRootInput(e) {
@@ -232,27 +233,28 @@ function SpellingGame() {
   // --- Test UI ---
   function readWord() {
     if ('speechSynthesis' in window) {
-      const utter = new window.SpeechSynthesisUtterance(`Spell ${fullWord}`);
-      utter.voice = getVoiceByName(selectedVoice);
-      window.speechSynthesis.speak(utter);
-    }
+    const utter = new SpeechSynthesisUtterance(word);
+    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+    if (voice) utter.voice = voice;
+    window.speechSynthesis.speak(utter);
   }
+}
   function readSentence() {
     if ('speechSynthesis' in window) {
-      const utter = new window.SpeechSynthesisUtterance(wordObj.sentence);
-      utter.voice = getVoiceByName(selectedVoice);
-      window.speechSynthesis.speak(utter);
-    }
+    const utter = new SpeechSynthesisUtterance(word);
+    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+    if (voice) utter.voice = voice;
+    window.speechSynthesis.speak(utter);
   }
+}
   function spellingBeeRecap(word) {
-    const lettersSpaced = word.toUpperCase().split('').join('... ');
-    const recapText = `Correct, ${word}. ${lettersSpaced}. ${word}.`;
     if ('speechSynthesis' in window) {
-      const utter = new window.SpeechSynthesisUtterance(recapText);
-      utter.voice = getVoiceByName(selectedVoice);
-      window.speechSynthesis.speak(utter);
-    }
+    const utter = new SpeechSynthesisUtterance(word);
+    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+    if (voice) utter.voice = voice;
+    window.speechSynthesis.speak(utter);
   }
+}
   function handleInput(e) {
     setInput(e.target.value);
   }

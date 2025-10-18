@@ -17,7 +17,7 @@ function shuffle(arr) {
 
 const shuffledSet = () => shuffle(readingWords);
 
-function ReadingModule() {
+function ReadingModule({ selectedVoice }) {
   const [index, setIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [wordList, setWordList] = useState(shuffledSet());
@@ -26,6 +26,8 @@ function ReadingModule() {
   function speakWord(word) {
     if ('speechSynthesis' in window) {
       const utter = new window.SpeechSynthesisUtterance(word);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
       window.speechSynthesis.speak(utter);
     }
   }
