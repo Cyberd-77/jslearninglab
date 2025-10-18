@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SpellingGame from './SpellingGame';
 import MathModule from './MathModule';
+import ReadingModule from './ReadingModule';
 
 export default function App() {
   const [subject, setSubject] = useState(null);
@@ -8,6 +9,7 @@ export default function App() {
   const backgroundColors = {
     spelling: 'bg-gradient-to-br from-cyan-500 via-pink-400 to-yellow-200',
     math: 'bg-gradient-to-br from-green-400 to-blue-500',
+    reading: 'bg-gradient-to-br from-green-600 via-green-400 to-yellow-300',
     default: 'bg-gradient-to-br from-gray-500 to-gray-700'
   };
 
@@ -29,6 +31,12 @@ export default function App() {
           >
             🔢 Math
           </button>
+          <button
+            onClick={() => setSubject('reading')}
+            className="bg-green-500 hover:bg-green-700 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition"
+          >
+            📚 Reading
+          </button>
         </div>
       </div>
     );
@@ -45,6 +53,7 @@ export default function App() {
 
       {subject === 'spelling' && <SpellingGame />}
       {subject === 'math' && <MathModule />}
+      {subject === 'reading' && <ReadingModule />}
     </div>
   );
 }
