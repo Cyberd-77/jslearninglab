@@ -7,15 +7,43 @@ function MathModule() {
     { question: "6 + 6", answer: "12" }
   ];
 
+  const positivePhrases = [
+    (q, a) => `Great job J, ${q} equals ${a}.`,
+    (q, a) => `Fantastic, ${q} is ${a}.`,
+    (q, a) => `You nailed it! ${q} equals ${a}.`,
+    (q, a) => `Excellent work! ${q} equals ${a}.`
+  ];
+
+  const negativePhrases = [
+    () => `Try again, J.`,
+    () => `Almost there, try once more.`,
+    () => `Don't give up, J, try again.`,
+    () => `Keep going! You can do it.`
+  ];
+
   const [current, setCurrent] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [message, setMessage] = useState('');
 
+  function speakFeedback(isCorrect, question, answer) {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+
+    const phraseList = isCorrect ? positivePhrases : negativePhrases;
+    const phraseIndex = Math.floor(Math.random() * phraseList.length);
+    const text = isCorrect ? phraseList[phraseIndex](question, answer) : phraseList[phraseIndex]();
+
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
+  }
+
   function checkAnswer() {
     if (userAnswer.trim() === mathProblems[current].answer) {
       setScore(score + 1);
       setMessage('✅ Correct!');
+      speakFeedback(true, mathProblems[current].question, mathProblems[current].answer);
       setTimeout(() => {
         setMessage('');
         setUserAnswer('');
@@ -27,6 +55,7 @@ function MathModule() {
       }, 1000);
     } else {
       setMessage('❌ Try again.');
+      speakFeedback(false);
     }
   }
 
@@ -42,6 +71,7 @@ function MathModule() {
             onChange={e => setUserAnswer(e.target.value)}
             className="text-lg px-4 py-2 rounded-md w-48 text-center"
             aria-label="Answer input"
+            autoFocus
           />
           <button
             onClick={checkAnswer}
