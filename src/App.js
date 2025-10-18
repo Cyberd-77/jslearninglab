@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Game words (customize sentences for personality!)
+// Game words (customize sentences!)
 const words = [
   { root: "smile", suffix: "smiling", hint: "s____g", sentence: "She was smiling all day at the finish line!" },
   { root: "race", suffix: "racing", hint: "r____g", sentence: "The cars are racing super fast!" },
@@ -24,6 +24,8 @@ function shuffleList(list) {
 }
 
 function SpellingGame() {
+  // State variables
+  const [isPreview, setIsPreview] = useState(true);
   const [shuffledWords, setShuffledWords] = useState([]);
   const [current, setCurrent] = useState(0);
   const [input, setInput] = useState('');
@@ -35,6 +37,7 @@ function SpellingGame() {
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState('');
 
+  // Set shuffled words when component mounts
   useEffect(() => {
     setShuffledWords(shuffleList(words));
     setCurrent(0);
@@ -46,6 +49,7 @@ function SpellingGame() {
     setMessage('');
   }, []);
 
+  // Load available voices
   useEffect(() => {
     const populateVoices = () => {
       const voicesList = window.speechSynthesis.getVoices();
@@ -62,20 +66,66 @@ function SpellingGame() {
     populateVoices();
   }, []);
 
+  // Safely define wordObj and fullWord where possible
+  const wordObj = shuffledWords.length > 0 ? shuffledWords[current] : null;
+  const fullWord = wordObj ? (wordObj.suffix || wordObj.root) : "";
+
   useEffect(() => {
-    if (speakOnStart && shuffledWords.length > 0) {
+    if (speakOnStart && shuffledWords.length > 0 && wordObj) {
       readWord();
       setSpeakOnStart(false);
     }
-  }, [current, shuffledWords]); // eslint-disable-line
-
-  if (!shuffledWords.length) return <div>Loading...</div>;
-  const wordObj = shuffledWords[current];
-  const fullWord = wordObj.suffix || wordObj.root;
+    // eslint-disable-next-line
+  }, [current, shuffledWords]);
 
   function getVoiceByName(name) {
     return voices.find(v => v.name === name);
   }
+
+  function playWordAudio(word) {
+    if ('speechSynthesis' in window) {
+      const utter = new window.SpeechSynthesisUtterance(word);
+      utter.voice = getVoiceByName(selectedVoice);
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  // --------------- PREVIEW UI ---------------
+  if (isPreview) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-500 via-pink-400 to-yellow-200 font-sans p-6">
+        <h2 className="text-4xl font-extrabold mb-6 text-white drop-shadow text-center">
+          📝 Preview the Words You'll Spell!
+        </h2>
+        <ul className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full space-y-3">
+          {words.map(({ suffix, root }) => {
+            const previewWord = suffix || root;
+            return (
+              <li key={previewWord} className="flex justify-between items-center py-2 px-4 rounded-lg border border-cyan-400 hover:bg-cyan-50 cursor-pointer">
+                <span className="text-xl font-semibold text-cyan-800">{previewWord}</span>
+                <button
+                  onClick={() => playWordAudio(previewWord)}
+                  className="bg-cyan-400 hover:bg-cyan-600 text-white rounded-full px-3 py-1 font-bold"
+                  aria-label={`Hear ${previewWord}`}
+                >
+                  🔊
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <button
+          onClick={() => setIsPreview(false)}
+          className="mt-8 px-6 py-3 rounded-full bg-green-500 hover:bg-green-700 font-black text-white shadow-lg transition"
+        >
+          Start Test ➡️
+        </button>
+      </div>
+    );
+  }
+
+  // --------------- GAME UI ---------------
+  if (!wordObj) return <div>Loading...</div>;
 
   function readWord() {
     if ('speechSynthesis' in window) {
@@ -125,7 +175,7 @@ function SpellingGame() {
         } else {
           setMessage('🎆 You finished the race! Press Shuffle to play again.');
         }
-      }, 2800); // let audio finish
+      }, 2800);
     } else {
       setMessage('Try again!');
     }
@@ -168,6 +218,7 @@ function SpellingGame() {
 
   const progressPercent = Math.round((current + 1) / shuffledWords.length * 100);
 
+  // Main test UI
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-cyan-500 via-pink-400 to-yellow-200 font-sans">
       <h2 className="text-4xl md:text-5xl font-extrabold mb-8 text-white drop-shadow flex items-center gap-2">
@@ -193,6 +244,7 @@ function SpellingGame() {
             className="rounded-lg px-2 py-1 border-2 border-cyan-500 bg-white text-cyan-900 w-2/3"
             value={selectedVoice}
             onChange={e => setSelectedVoice(e.target.value)}
+            aria-label="Select voice"
           >
             {voices.map(v =>
               <option key={v.name} value={v.name}>
@@ -235,6 +287,7 @@ function SpellingGame() {
           onChange={handleInput}
           className="text-lg tracking-widest text-center border-4 border-cyan-500 rounded-xl px-4 py-2 mb-4 w-full font-mono shadow-inner"
           placeholder="Type here!"
+          aria-label="Spell the word input"
         />
 
         <button
@@ -252,6 +305,7 @@ function SpellingGame() {
             className={`bg-gray-400 text-white px-4 py-2 rounded-lg font-bold
               ${current === 0 ? 'opacity-50' : 'hover:bg-gray-600'}
               shadow`}
+            aria-label="Previous word"
           >
             ⬅️ Back
           </button>
@@ -261,6 +315,7 @@ function SpellingGame() {
             className={`bg-gray-400 text-white px-4 py-2 rounded-lg font-bold
               ${current === shuffledWords.length - 1 ? 'opacity-50' : 'hover:bg-gray-600'}
               shadow`}
+            aria-label="Next word"
           >
             Next ➡️
           </button>
@@ -269,23 +324,26 @@ function SpellingGame() {
         <div
           className="mt-4 min-h-[2.5em] w-full text-center text-xl font-bold
             text-purple-700"
+          role="alert"
+          aria-live="polite"
         >
           {message}
         </div>
 
-        <div className="mt-2 text-xl font-black text-cyan-700">
+        <div className="mt-2 text-xl font-black text-cyan-700" aria-label="Score">
           Score: {score} / {words.length}
         </div>
 
         <button
           onClick={shuffleWords}
           className="bg-purple-400 hover:bg-purple-600 transition text-white font-black rounded-full px-6 py-2 mt-5 text-lg shadow-lg"
+          aria-label="Shuffle words"
         >
           🔀 Shuffle Words
         </button>
 
         {completed.every(Boolean) && (
-          <div className="my-6 text-2xl font-extrabold text-yellow-600 animate-bounce">
+          <div className="my-6 text-2xl font-extrabold text-yellow-600 animate-bounce" role="status" aria-live="polite">
             🏆 Race Winner! All words complete!
           </div>
         )}
