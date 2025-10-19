@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/jslearninglab/static/css/main.1ecfacc5.css",
-    "main.js": "/jslearninglab/static/js/main.a8a19b0e.js",
+    "main.css": "/jslearninglab/static/css/main.f6835850.css",
+    "main.js": "/jslearninglab/static/js/main.f4b583b1.js",
     "static/js/453.f2d43bfc.chunk.js": "/jslearninglab/static/js/453.f2d43bfc.chunk.js",
     "index.html": "/jslearninglab/index.html",
-    "main.1ecfacc5.css.map": "/jslearninglab/static/css/main.1ecfacc5.css.map",
-    "main.a8a19b0e.js.map": "/jslearninglab/static/js/main.a8a19b0e.js.map",
+    "main.f6835850.css.map": "/jslearninglab/static/css/main.f6835850.css.map",
+    "main.f4b583b1.js.map": "/jslearninglab/static/js/main.f4b583b1.js.map",
     "453.f2d43bfc.chunk.js.map": "/jslearninglab/static/js/453.f2d43bfc.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.1ecfacc5.css",
-    "static/js/main.a8a19b0e.js"
+    "static/css/main.f6835850.css",
+    "static/js/main.f4b583b1.js"
   ]
 }
