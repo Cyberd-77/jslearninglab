@@ -75,7 +75,7 @@ function SpellingGame({ selectedVoice }) {
     setCompleted(Array(words.length).fill(false));
     setSpeakOnStart(true);
     setMessage('');
-  }, [wordSet]);
+  }, [words]);
 
   // Speech helpers
   function speak(text) {

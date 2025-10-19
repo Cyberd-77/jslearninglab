@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 // Use your comprehensive master word list (paste your full array here)
 const masterWordList = [
-  "this","here","find","me","that","no","work","come","how","help","day","what","down","case","ever","two","same","said","new","an","baseball","factory","learned","felt","sold","midnight","party","below","horn","rush","ground","fixed","idea","ring","east","sand","thanks","deck","receiving","half","building","plant","desk","alone","worn","mean","week","sleep","grip","draw","repeat","pat","motion","bed","rest","pair","black","trip","gate","trap","opening","ready","having","try","raise","trade","paint","everything","goods","pack","sight","root","behind","height","lips","blood","memory","sudden","perform","river","air","hole","mine","bag","powerful","afternoon","beauty","clock","envelope","sale","friend","sky","free","date","smile","meaning","park","sink","needs","sum","kept","cap","hard","fishing","hill","tonight","hidden","perhaps","dog","speaker","arrive","ladies","wild","buy","track","chair","sister","human","inch","split","loves","pound","cream","row","partner","slip","winning","football","fool","kitchen","all","number","same","how","one","case","get","find","just","with","still","had","the","why","over","against","we","never","to","back","book","favor","net","split","complete","crowd","hung","baseball","funny","soft","terrible","double","addition","pocket","drop","march","receive","warning","shadow","empty","desk","shot","kind","darkness","calendar","pick","city","hall","tiny","solve","chest","fight","silver","thanks","went","snow","bag","mail","pink","write","married","motor","bent","able","blind","gift","size","build","wooden","wall","inch","trade","sweet","color","pilot","award","dog","musical","change","top","deep","silence","wake","worn","eight","air","load","harm","page","coffee","tie","lane","chicken","happen","ahead","act","alive","large","body","mixture","forward","winning","plane","mile","wife","acting","fire","solid","ball","breakfast","sound","yourself","stretch","anger","coat","hat","mystery","husband","sing","born","milk","envelope","highway","anything","strong","throw","match","seeing","grow","save"
+  "this", "here", "find", "me", "that", "no", "work", "come", "how", "help", "day", "what", "down", "case", "ever", "two", "same", "said", "new", "an", "baseball", "factory", "learned", "felt", "sold", "midnight", "party", "below", "horn", "rush", "ground", "fixed", "idea", "ring", "east", "sand", "thanks", "deck", "receiving", "half", "building", "plant", "desk", "alone", "worn", "mean", "week", "sleep", "grip", "draw", "repeat", "pat", "motion", "bed", "rest", "pair", "black", "trip", "gate", "trap", "opening", "ready", "having", "try", "raise", "trade", "paint", "everything", "goods", "pack", "sight", "root", "behind", "height", "lips", "blood", "memory", "sudden", "perform", "river", "air", "hole", "mine", "bag", "powerful", "afternoon", "beauty", "clock", "envelope", "sale", "friend", "sky", "free", "date", "smile", "meaning", "park", "sink", "needs", "sum", "kept", "cap", "hard", "fishing", "hill", "tonight", "hidden", "perhaps", "dog", "speaker", "arrive", "ladies", "wild", "buy", "track", "chair", "sister", "human", "inch", "split", "loves", "pound", "cream", "row", "partner", "slip", "winning", "football", "fool", "kitchen", "all", "number", "same", "how", "one", "case", "get", "find", "just", "with", "still", "had", "the", "why", "over", "against", "we", "never", "to", "back", "book", "favor", "net", "split", "complete", "crowd", "hung", "baseball", "funny", "soft", "terrible", "double", "addition", "pocket", "drop", "march", "receive", "warning", "shadow", "empty", "desk", "shot", "kind", "darkness", "calendar", "pick", "city", "hall", "tiny", "solve", "chest", "fight", "silver", "thanks", "went", "snow", "bag", "mail", "pink", "write", "married", "motor", "bent", "able", "blind", "gift", "size", "build", "wooden", "wall", "inch", "trade", "sweet", "color", "pilot", "award", "dog", "musical", "change", "top", "deep", "silence", "wake", "worn", "eight", "air", "load", "harm", "page", "coffee", "tie", "lane", "chicken", "happen", "ahead", "act", "alive", "large", "body", "mixture", "forward", "winning", "plane", "mile", "wife", "acting", "fire", "solid", "ball", "breakfast", "sound", "yourself", "stretch", "anger", "coat", "hat", "mystery", "husband", "sing", "born", "milk", "envelope", "highway", "anything", "strong", "throw", "match", "seeing", "grow", "save"
 ];
 
 function getRandomWords(wordList, count) {
@@ -25,16 +25,17 @@ function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
   // Only reset grid on mount or gridSize change
   useEffect(() => {
     resetGrid();
-  }, [gridSize]);
+  }, [gridSize, resetGrid]);
 
-  function resetGrid() {
+  // define resetGrid as stable using useCallback
+  const resetGrid = React.useCallback(() => {
     const chosen = getRandomWords(masterWordList, gridSize * gridSize);
     setGridWords(chosen);
     const answerIdx = Math.floor(Math.random() * chosen.length);
     setAnswer(chosen[answerIdx]);
     setMessage('');
     setTries(0);
-  }
+  }, [gridSize]);
 
   function speakWord(word) {
     if ('speechSynthesis' in window) {
@@ -61,7 +62,7 @@ function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-green-100 to-yellow-100 font-sans">
       <h2 className="text-3xl md:text-4xl font-extrabold mb-6 text-blue-800 drop-shadow text-center">
-        👀 Find the Word Game
+        Find the Word Game
       </h2>
       <div className="bg-white rounded-2xl shadow-xl px-6 py-8 max-w-lg w-full flex flex-col items-center">
         <p className="mb-4 text-lg font-bold">Listen and tap/click the matching word:</p>
@@ -69,32 +70,35 @@ function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
           onClick={() => speakWord(answer)}
           className="mb-6 bg-blue-500 hover:bg-blue-700 text-white rounded-full px-8 py-3 font-black shadow text-2xl"
         >
-          🔊 Hear Word
+          Hear Word
         </button>
-        <div className="grid mb-8 gap-4" style={{
-          gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
-          width: '100%',
-        }}>
+        <div
+          className="grid mb-8 gap-4"
+          style={{
+            gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
+            width: '100%',
+          }}
+        >
           {gridWords.map((word, i) => (
             <button
               key={word + i}
               onClick={() => check(word)}
               className="bg-gray-100 hover:bg-green-200 text-gray-900 rounded-xl shadow px-4 py-3 text-xl font-bold transition border-2 border-blue-200"
-              style={{ minWidth: "5em" }}
+              style={{ minWidth: '5em' }}
             >
               {word}
             </button>
           ))}
         </div>
-        <div className="text-lg min-h-[2.2em] font-bold text-green-700">
-          {message}
+        <div className="text-lg min-h-2.2em font-bold text-green-700">{message}</div>
+        <div className="mt-6 text-blue-500 text-base text-center">
+          Score: {score} | Tries: {tries}
         </div>
-        <div className="mt-6 text-blue-500 text-base text-center">Score: {score} | Tries: {tries}</div>
         <button
           onClick={() => { setScore(0); resetGrid(); }}
           className="mt-6 bg-purple-400 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold shadow"
         >
-          🔄 Restart Game
+          Restart Game
         </button>
       </div>
     </div>

@@ -19,7 +19,6 @@ const shuffledSet = () => shuffle(readingWords);
 
 function ReadingModule({ selectedVoice }) {
   const [index, setIndex] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
   const [wordList, setWordList] = useState(shuffledSet());
   const [message, setMessage] = useState('');
 
