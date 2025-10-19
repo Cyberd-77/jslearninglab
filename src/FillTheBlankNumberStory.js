@@ -1,46 +1,56 @@
 import React, { useState } from 'react';
 
-// Ten example number stories for young learners
+// Ten example number stories for young learners, now WITH number choices!
 const stories = [
   {
     textParts: ["Mom had ", " hot dogs. She gave away ", " to friends. Now she has ", " left."],
-    blanks: [5, 3, 2]
+    blanks: [5, 3, 2],
+    choices: [2, 3, 5, 6]
   },
   {
     textParts: ["There are ", " apples on the tree. If ", " fall down, how many are left? ", ""],
-    blanks: [10, 4, 6]
+    blanks: [10, 4, 6],
+    choices: [4, 6, 8, 10]
   },
   {
     textParts: ["Tom had ", " marbles. He won ", " more. Now he has ", " marbles in total."],
-    blanks: [7, 5, 12]
+    blanks: [7, 5, 12],
+    choices: [5, 7, 9, 12]
   },
   {
     textParts: ["Jeremiah had ", " race cars. He lost ", ". How many does he still have? ", ""],
-    blanks: [8, 3, 5]
+    blanks: [8, 3, 5],
+    choices: [3, 5, 6, 8]
   },
   {
     textParts: ["J picked ", " flowers for mom and then picked ", " more. Altogether, he picked ", " flowers."],
-    blanks: [6, 2, 8]
+    blanks: [6, 2, 8],
+    choices: [2, 4, 6, 8]
   },
   {
     textParts: ["A baker made ", " cookies. She gave away ", " cookies at school. How many remain? ", ""],
-    blanks: [12, 5, 7]
+    blanks: [12, 5, 7],
+    choices: [5, 7, 9, 12]
   },
   {
     textParts: ["Jeremiah saw ", " birds outside. ", " flew away. Now there are ", " birds left."],
-    blanks: [9, 4, 5]
+    blanks: [9, 4, 5],
+    choices: [4, 5, 7, 9]
   },
   {
     textParts: ["J has ", " pennies. He finds ", " more under the couch. How many does he have now? ", ""],
-    blanks: [3, 4, 7]
+    blanks: [3, 4, 7],
+    choices: [3, 4, 6, 7]
   },
   {
     textParts: ["A basket holds ", " oranges. If you eat ", " oranges, how many are left in the basket? ", ""],
-    blanks: [7, 2, 5]
+    blanks: [7, 2, 5],
+    choices: [2, 5, 7, 9]
   },
   {
     textParts: ["Jeremiah built ", " LEGO towers. He built ", " more the next day. In total, he built ", " towers."],
-    blanks: [2, 3, 5]
+    blanks: [2, 3, 5],
+    choices: [2, 3, 4, 5]
   }
 ];
 
@@ -50,7 +60,7 @@ const positiveFeedback = [
   "Perfect answer!",
   "You're a math superstar!",
   "Correct, J!",
-  "You did it, Jeremiah!",
+  "You did it, Jeremiah!"
 ];
 
 function FillTheBlankNumberStory({ selectedVoice }) {
@@ -76,7 +86,11 @@ function FillTheBlankNumberStory({ selectedVoice }) {
   }
 
   function handleChange(index, value) {
-    if (/^\d*$/.test(value)) {
+    // Only allow blanks to be set to one of the available choices
+    if (
+      value === "" ||
+      stories[currentStory].choices.map(String).includes(value)
+    ) {
       const newInputs = [...inputs];
       newInputs[index] = value;
       setInputs(newInputs);
@@ -87,7 +101,7 @@ function FillTheBlankNumberStory({ selectedVoice }) {
     const correctAnswers = stories[currentStory].blanks;
     let newFeedback = [];
     let correctCount = 0;
-    for(let i = 0; i < correctAnswers.length; i++) {
+    for (let i = 0; i < correctAnswers.length; i++) {
       if (parseInt(inputs[i], 10) === correctAnswers[i]) {
         newFeedback[i] = true;
         correctCount++;
@@ -131,7 +145,14 @@ function FillTheBlankNumberStory({ selectedVoice }) {
         Fill-the-Blank Number Story
       </h2>
       <div className="bg-white rounded-2xl shadow-lg px-5 py-8 max-w-xl w-full flex flex-col items-center">
-        <div className="mb-8 text-lg">
+        <div className="mb-4 font-semibold text-blue-700 text-lg">
+          Number choices:&nbsp;
+          {story.choices.map((num, i) => (
+            <span key={num} className="inline-block mx-1 px-2 py-1 bg-blue-100 rounded-full border">{num}</span>
+          ))}
+        </div>
+
+        <div className="mb-8 text-lg text-gray-900">
           {story.textParts.map((part, idx) => (
             <span key={idx}>
               {part}
@@ -143,16 +164,26 @@ function FillTheBlankNumberStory({ selectedVoice }) {
                   className={`mx-2 px-2 py-1 rounded-md border-2 ${feedback[idx] === true
                     ? "border-green-400 bg-green-50"
                     : feedback[idx] === false
-                    ? "border-red-400 bg-red-50"
-                    : "border-gray-300 bg-gray-50"}`}
+                      ? "border-red-400 bg-red-50"
+                      : "border-gray-300 bg-gray-50"}`}
                   style={{ width: 50 }}
                   disabled={completed}
-                  aria-label={`blank ${idx+1}`}
+                  aria-label={`blank ${idx + 1}`}
+                  min={Math.min(...story.choices)}
+                  max={Math.max(...story.choices)}
+                  list={`choices${currentStory}`}
                 />
               )}
             </span>
           ))}
+          {/* Datalist for easy touch/mobile pick */}
+          <datalist id={`choices${currentStory}`}>
+            {story.choices.map((num) => (
+              <option key={num} value={num} />
+            ))}
+          </datalist>
         </div>
+
         <button
           onClick={checkAnswers}
           className="bg-blue-500 hover:bg-blue-700 text-white rounded-full px-7 py-2 font-bold shadow text-lg mb-3"
