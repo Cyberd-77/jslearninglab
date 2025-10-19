@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import QuickFactsDrill from './QuickFactsDrill';
+import MathMatch from './MathMatch';
+import FillTheBlankNumberStory from './FillTheBlankNumberStory';
 
 function MathModule({ selectedVoice }) {
   const [gameMode, setGameMode] = useState('menu');
@@ -17,7 +19,19 @@ function MathModule({ selectedVoice }) {
           >
             🚦 Quick Facts Drill
           </button>
-          <p className="text-gray-600 text-center text-sm">More games coming soon!</p>
+          <button
+            onClick={() => setGameMode('mathmatch')}
+            className="bg-blue-500 hover:bg-blue-700 text-white rounded-full px-8 py-4 text-xl font-bold shadow-lg transition w-full"
+          >
+            🎯 Math Match
+          </button>
+          <button
+            onClick={() => setGameMode('fillblank')}
+            className="bg-purple-600 hover:bg-purple-800 text-white rounded-full px-8 py-4 text-xl font-bold shadow-lg transition w-full"
+          >
+            📝 Fill The Blank Number Story
+          </button>
+          <p className="text-gray-600 text-center text-sm mt-4">More games coming soon!</p>
         </div>
       </div>
     );
@@ -30,9 +44,37 @@ function MathModule({ selectedVoice }) {
           onClick={() => setGameMode('menu')}
           className="absolute top-4 left-4 bg-white rounded-full px-4 py-2 font-bold shadow hover:bg-gray-200 transition z-10"
         >
-          ← Back to Games
+          ← Back to Math Games
         </button>
         <QuickFactsDrill selectedVoice={selectedVoice} />
+      </div>
+    );
+  }
+
+  if (gameMode === 'mathmatch') {
+    return (
+      <div>
+        <button
+          onClick={() => setGameMode('menu')}
+          className="absolute top-4 left-4 bg-white rounded-full px-4 py-2 font-bold shadow hover:bg-gray-200 transition z-10"
+        >
+          ← Back to Math Games
+        </button>
+        <MathMatch selectedVoice={selectedVoice} />
+      </div>
+    );
+  }
+
+  if (gameMode === 'fillblank') {
+    return (
+      <div>
+        <button
+          onClick={() => setGameMode('menu')}
+          className="absolute top-4 left-4 bg-white rounded-full px-4 py-2 font-bold shadow hover:bg-gray-200 transition z-10"
+        >
+          ← Back to Math Games
+        </button>
+        <FillTheBlankNumberStory selectedVoice={selectedVoice} />
       </div>
     );
   }
