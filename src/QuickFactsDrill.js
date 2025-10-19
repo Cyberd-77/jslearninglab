@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Generate ALL addition/subtraction problems for 0-20 (result also max 20, no negatives)
+// Generate all addition and subtraction problems with answers up to 20
 const ADDITION_PROBLEMS = Array.from({ length: 21 }, (_, a) =>
   Array.from({ length: 21 }, (_, b) => ({
     type: 'addition',
@@ -10,16 +10,21 @@ const ADDITION_PROBLEMS = Array.from({ length: 21 }, (_, a) =>
 ).flat().filter(q => q.answer <= 20);
 
 const SUBTRACTION_PROBLEMS = Array.from({ length: 21 }, (_, a) =>
-  Array.from({ length: 21 }, (_, b) => a - b >= 0 ? {
-    type: 'subtraction',
-    prompt: `${a} - ${b}`,
-    answer: a - b
-  } : null)
-).flat().filter(q => q && q.answer <= 20);
+  Array.from({ length: 21 }, (_, b) =>
+    a - b >= 0
+      ? {
+          type: 'subtraction',
+          prompt: `${a} - ${b}`,
+          answer: a - b
+        }
+      : null
+  )
+)
+  .flat()
+  .filter(q => q && q.answer <= 20);
 
 const ALL_PROBLEMS = [...ADDITION_PROBLEMS, ...SUBTRACTION_PROBLEMS];
 
-// Random response templates
 const positivePhrases = [
   "Great job!",
   "Awesome work, J!",
@@ -62,6 +67,7 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
   const [input, setInput] = useState('');
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
     setQuiz(getRandomSample(ALL_PROBLEMS, numQuestions));
@@ -69,7 +75,8 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
     setInput('');
     setFeedback('');
     setScore(0);
-  }, [numQuestions]); // Reset when changing number of questions in future feature
+    setFinished(false);
+  }, [numQuestions]);
 
   function speak(text) {
     if ('speechSynthesis' in window) {
@@ -89,6 +96,15 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
     setInput(value);
   }
 
+  function speakPromptMathFriendly(prompt) {
+    let spoken = prompt
+      .replace(/\+/g, ' plus ')
+      .replace(/-/g, ' minus ')
+      .replace(/\*/g, ' times ')
+      .replace(/\//g, ' divided by ');
+    speak(spoken.trim());
+  }
+
   function checkAnswer() {
     const currentProblem = quiz[index];
     if (parseInt(input, 10) === currentProblem.answer) {
@@ -96,11 +112,18 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
       speak(phrase);
       setFeedback(`✅ ${phrase}`);
       setScore(score + 1);
-      setTimeout(() => {
-        setFeedback('');
-        setInput('');
-        if (index < quiz.length - 1) setIndex(index + 1);
-      }, 950);
+
+      if (index < quiz.length - 1) {
+        setTimeout(() => {
+          setFeedback('');
+          setInput('');
+          setIndex(index + 1);
+        }, 950);
+      } else {
+        setTimeout(() => {
+          setFinished(true);
+        }, 950);
+      }
     } else {
       const encouragement = randomPhrase(encouragementPhrases);
       speak(encouragement);
@@ -126,18 +149,16 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
     setInput('');
     setFeedback('');
     setScore(0);
+    setFinished(false);
   }
 
-  // Refs to current problem
-  const currentProblem = quiz[index];
-
-  // Final screen
-  if (index === quiz.length) {
+  // Final Celebration Screen
+  if (finished) {
     const phrase = randomPhrase([
-      "You finished Jeremiah!",
-      "Awesome job J!",
+      "You finished, Jeremiah!",
+      "Awesome job, J!",
       "You're a math star!",
-      "Quiz complete! Well done!"
+      "Quiz complete. Well done!"
     ]);
     speak(phrase);
     return (
@@ -156,7 +177,9 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
     );
   }
 
-  // Main game screen
+  // Main Question Screen
+  const currentProblem = quiz[index];
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-100 via-blue-100 to-yellow-100 p-8 font-sans">
       <h2 className="text-3xl md:text-4xl font-extrabold mb-6 text-blue-800 drop-shadow text-center">
@@ -170,18 +193,11 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
           {currentProblem.prompt}
         </div>
         <button
-  onClick={() => {
-    let spoken = currentProblem.prompt
-      .replace(/\+/g, ' plus ')
-      .replace(/-/g, ' minus ')
-      .replace(/\*/g, ' times ')
-      .replace(/\//g, ' divided by ');
-    speak(spoken.trim());
-  }}
-  ...
->
-  🔊 Read Problem
-</button>
+          onClick={() => speakPromptMathFriendly(currentProblem.prompt)}
+          className="mb-4 bg-blue-400 hover:bg-blue-600 text-white rounded-full px-6 py-2 font-bold shadow"
+        >
+          🔊 Read Problem
+        </button>
         <input
           type="text"
           value={input}
