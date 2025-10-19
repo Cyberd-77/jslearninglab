@@ -15,15 +15,15 @@ const WEEKLY_WORD_SETS = {
     { root: "were", suffix: "", full: "were", hint: "w___", sentence: "They were happy when the game ended." }
   ],
   lastweek: [
-    { root: "yell", suffix: "ed", full: "yelled" },
-    { root: "yank", suffix: "ed", full: "yanked" },
-    { root: "slump", suffix: "ed", full: "slumped" },
-    { root: "limp", suffix: "ed", full: "limped" },
-    { root: "plop", suffix: "ed", full: "plopped" },
-    { root: "smile", suffix: "ed", full: "smiled" },
-    { root: "shrug", suffix: "ed", full: "shrugged" },
-    { root: "like", suffix: "ed", full: "liked" },
-    { root: "pat", suffix: "ed", full: "patted" }
+    { root: "yell", suffix: "ed", full: "yelled", hint: "y___d", sentence: "He yelled for help in the park." },
+    { root: "yank", suffix: "ed", full: "yanked", hint: "y____d", sentence: "She yanked her backpack off the hook." },
+    { root: "slump", suffix: "ed", full: "slumped", hint: "s_____d", sentence: "He slumped down in his chair." },
+    { root: "limp", suffix: "ed", full: "limped", hint: "l____d", sentence: "She limped home after the race." },
+    { root: "plop", suffix: "ed", full: "plopped", hint: "p______d", sentence: "He plopped onto the couch." },
+    { root: "smile", suffix: "ed", full: "smiled", hint: "s____d", sentence: "She smiled after she finished her homework." },
+    { root: "shrug", suffix: "ed", full: "shrugged", hint: "s______d", sentence: "He shrugged when he didn’t know the answer." },
+    { root: "like", suffix: "ed", full: "liked", hint: "l___d", sentence: "He liked playing soccer." },
+    { root: "pat", suffix: "ed", full: "p___d", sentence: "She patted the dog on the head." }
   ]
 };
 
@@ -148,12 +148,14 @@ function SpellingGame({ selectedVoice }) {
   }
   function readSentence() {
     const wordObj = shuffledWords[current];
-    if (wordObj && wordObj.sentence) {
-      const utter = new window.SpeechSynthesisUtterance(wordObj.sentence);
-      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
-      if (voice) utter.voice = voice;
-      window.speechSynthesis.speak(utter);
+    let sentence = wordObj && wordObj.sentence;
+    if (!sentence) {
+      sentence = `Here is a sentence using the word ${wordObj.full}.`;
     }
+    const utter = new window.SpeechSynthesisUtterance(sentence);
+    const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+    if (voice) utter.voice = voice;
+    window.speechSynthesis.speak(utter);
   }
   function spellingBeeRecap(word) {
     const lettersSpaced = word.toUpperCase().split('').join('... ');
@@ -363,25 +365,25 @@ function SpellingGame({ selectedVoice }) {
           >
             🗣️ Hear word
           </button>
-          {shuffledWords[current].sentence && (
-            <button
-              onClick={readSentence}
-              className="bg-yellow-300 hover:bg-yellow-500 transition text-purple-700 rounded-full px-4 py-2 text-lg shadow font-bold flex gap-2 items-center"
-            >
-              📢 Hear sentence
-            </button>
-          )}
+          <button
+            onClick={readSentence}
+            className="bg-yellow-300 hover:bg-yellow-500 transition text-purple-700 rounded-full px-4 py-2 text-lg shadow font-bold flex gap-2 items-center"
+          >
+            📢 Hear sentence
+          </button>
         </div>
         {showHint && shuffledWords[current].hint ? (
-          <div className="text-lg text-pink-600 mb-3 font-semibold animate-pulse">Hint: {shuffledWords[current].hint}</div>
-        ) : (
+          <div className="text-lg text-pink-600 mb-3 font-semibold animate-pulse">
+            Hint: {shuffledWords[current].hint}
+          </div>
+        ) : shuffledWords[current].hint ? (
           <button
             onClick={giveHint}
             className="bg-pink-400 hover:bg-pink-600 transition text-white rounded-full px-4 py-2 mb-3 font-bold drop-shadow"
           >
             🧩 Show Hint
           </button>
-        )}
+        ) : null}
         <input
           value={input}
           onChange={handleInput}
