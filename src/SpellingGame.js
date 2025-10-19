@@ -17,13 +17,14 @@ const WEEKLY_WORD_SETS = {
   lastweek: [
     { root: "yell", suffix: "ed", full: "yelled", hint: "y___d", sentence: "He yelled for help in the park." },
     { root: "yank", suffix: "ed", full: "yanked", hint: "y____d", sentence: "She yanked her backpack off the hook." },
-    { root: "slump", suffix: "ed", full: "slumped", hint: "s_____d", sentence: "He slumped down in his chair." },
+    { root: "slump", suffix: "ed", full: "slumped", hint: "sl____d", sentence: "He slumped down in his chair." },
     { root: "limp", suffix: "ed", full: "limped", hint: "l____d", sentence: "She limped home after the race." },
-    { root: "plop", suffix: "ed", full: "plopped", hint: "p______d", sentence: "He plopped onto the couch." },
+    { root: "plop", suffix: "ed", full: "plopped", hint: "p_o___d", sentence: "He plopped onto the couch." },
     { root: "smile", suffix: "ed", full: "smiled", hint: "s____d", sentence: "She smiled after she finished her homework." },
     { root: "shrug", suffix: "ed", full: "shrugged", hint: "s______d", sentence: "He shrugged when he didn’t know the answer." },
-    { root: "like", suffix: "ed", full: "liked", hint: "l___d", sentence: "He liked playing soccer." },
-    { root: "pat", suffix: "ed", full: "p___d", sentence: "She patted the dog on the head." }
+    { root: "like", suffix: "ed", full: "liked", hint: "l_k_d", sentence: "He liked playing soccer." },
+    { root: "pat", suffix: "ed", full: "patted", sentence: "She patted the dog on the head." },
+    { root: "you", suffix: "", full: "you", hint: "__u", sentence: "Everyone was thrilled when you won the game!" }
   ]
 };
 
