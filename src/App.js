@@ -26,6 +26,7 @@ export default function App() {
     spelling: 'bg-gradient-to-br from-cyan-500 via-pink-400 to-yellow-200',
     math: 'bg-gradient-to-br from-green-400 to-blue-500',
     reading: 'bg-gradient-to-br from-green-600 via-green-400 to-yellow-300',
+    findword: 'bg-gradient-to-br from-blue-200 via-green-200 to-yellow-100',
     default: 'bg-gradient-to-br from-gray-500 to-gray-700'
   };
 
@@ -71,6 +72,12 @@ export default function App() {
             className="bg-green-500 hover:bg-green-700 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
           >
             📚 Reading
+          </button>
+          <button
+            onClick={() => setSubject('findword')}
+            className="bg-yellow-300 hover:bg-yellow-400 text-green-800 rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
+          >
+            👀 Find the Word
           </button>
         </div>
       </div>
