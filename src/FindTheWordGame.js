@@ -16,22 +16,25 @@ function getRandomWords(wordList, count) {
 }
 
 function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
-  // gridSize = words per row, and total will be gridSize * gridSize
   const [gridWords, setGridWords] = useState([]);
   const [answer, setAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [message, setMessage] = useState('');
   const [tries, setTries] = useState(0);
 
-  // Pick grid on mount and after win
+  // Only reset grid on mount or gridSize change
   useEffect(() => {
+    resetGrid();
+  }, [gridSize]);
+
+  function resetGrid() {
     const chosen = getRandomWords(masterWordList, gridSize * gridSize);
     setGridWords(chosen);
     const answerIdx = Math.floor(Math.random() * chosen.length);
     setAnswer(chosen[answerIdx]);
     setMessage('');
     setTries(0);
-  }, [score, gridSize]);
+  }
 
   function speakWord(word) {
     if ('speechSynthesis' in window) {
@@ -44,20 +47,14 @@ function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
 
   function check(clickedWord) {
     if (clickedWord === answer) {
-      setScore(score + 1);
       setMessage(`✅ Correct! Score: ${score + 1}`);
+      setScore(s => s + 1);
       setTimeout(() => {
-        setMessage('');
-        // refresh grid for next round
-        const chosen = getRandomWords(masterWordList, gridSize * gridSize);
-        setGridWords(chosen);
-        const answerIdx = Math.floor(Math.random() * chosen.length);
-        setAnswer(chosen[answerIdx]);
-        setTries(0);
+        resetGrid();
       }, 1500);
     } else {
       setMessage('❌ Try again!');
-      setTries(tries + 1);
+      setTries(t => t + 1);
     }
   }
 
@@ -94,7 +91,7 @@ function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
         </div>
         <div className="mt-6 text-blue-500 text-base text-center">Score: {score} | Tries: {tries}</div>
         <button
-          onClick={() => setScore(0)}
+          onClick={() => { setScore(0); resetGrid(); }}
           className="mt-6 bg-purple-400 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold shadow"
         >
           🔄 Restart Game
