@@ -134,10 +134,10 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
   // Final screen
   if (index === quiz.length) {
     const phrase = randomPhrase([
-      "You finished, Jeremiah!",
-      "Awesome job, J!",
+      "You finished Jeremiah!",
+      "Awesome job J!",
       "You're a math star!",
-      "Quiz complete. Well done!"
+      "Quiz complete! Well done!"
     ]);
     speak(phrase);
     return (
@@ -170,11 +170,18 @@ function QuickFactsDrill({ selectedVoice, numQuestions = 10 }) {
           {currentProblem.prompt}
         </div>
         <button
-          onClick={() => speak(currentProblem.prompt.replace('*', 'times').replace('/', 'divided by'))}
-          className="mb-4 bg-blue-400 hover:bg-blue-600 text-white rounded-full px-6 py-2 font-bold shadow"
-        >
-          🔊 Read Problem
-        </button>
+  onClick={() => {
+    let spoken = currentProblem.prompt
+      .replace(/\+/g, ' plus ')
+      .replace(/-/g, ' minus ')
+      .replace(/\*/g, ' times ')
+      .replace(/\//g, ' divided by ');
+    speak(spoken.trim());
+  }}
+  ...
+>
+  🔊 Read Problem
+</button>
         <input
           type="text"
           value={input}
