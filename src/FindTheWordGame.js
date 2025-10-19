@@ -22,19 +22,20 @@ function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
   const [message, setMessage] = useState('');
   const [tries, setTries] = useState(0);
 
-  // Only reset grid on mount or gridSize change
-  useEffect(() => {
-    resetGrid();
-  }, [gridSize, resetGrid]);
-
-  // define resetGrid as stable using useCallback
-  const resetGrid = React.useCallback(() => {
+  // move resetGrid above useEffect
+  function resetGrid() {
     const chosen = getRandomWords(masterWordList, gridSize * gridSize);
     setGridWords(chosen);
     const answerIdx = Math.floor(Math.random() * chosen.length);
     setAnswer(chosen[answerIdx]);
     setMessage('');
     setTries(0);
+  }
+
+  // Only reset grid on mount or gridSize change
+  useEffect(() => {
+    resetGrid();
+    // eslint-disable-next-line
   }, [gridSize]);
 
   function speakWord(word) {

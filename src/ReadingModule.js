@@ -32,7 +32,6 @@ function ReadingModule({ selectedVoice }) {
   }
 
   function nextWord() {
-    setShowAnswer(false);
     if (index < wordList.length - 1) {
       setIndex(index + 1);
     } else {
@@ -41,7 +40,6 @@ function ReadingModule({ selectedVoice }) {
   }
 
   function prevWord() {
-    setShowAnswer(false);
     if (index > 0) {
       setIndex(index - 1);
     }
@@ -50,7 +48,6 @@ function ReadingModule({ selectedVoice }) {
   function reshuffleWords() {
     setWordList(shuffledSet());
     setIndex(0);
-    setShowAnswer(false);
     setMessage('');
   }
 
