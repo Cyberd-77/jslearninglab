@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// Ten example number stories for young learners, now WITH number choices!
 const stories = [
   {
     textParts: ["Mom had ", " hot dogs. She gave away ", " to friends. Now she has ", " left."],
@@ -85,16 +84,10 @@ function FillTheBlankNumberStory({ selectedVoice }) {
       : `You got ${correct} out of ${total} correct. Keep trying, J!`;
   }
 
-  function handleChange(index, value) {
-    // Only allow blanks to be set to one of the available choices
-    if (
-      value === "" ||
-      stories[currentStory].choices.map(String).includes(value)
-    ) {
-      const newInputs = [...inputs];
-      newInputs[index] = value;
-      setInputs(newInputs);
-    }
+  function selectChoiceForBlank(blankIdx, val) {
+    const newInputs = [...inputs];
+    newInputs[blankIdx] = val;
+    setInputs(newInputs);
   }
 
   function checkAnswers() {
@@ -136,7 +129,6 @@ function FillTheBlankNumberStory({ selectedVoice }) {
     setCompleted(false);
   }
 
-  // Compose story text with blanks replaced by inputs
   const story = stories[currentStory];
 
   return (
@@ -145,43 +137,48 @@ function FillTheBlankNumberStory({ selectedVoice }) {
         Fill-the-Blank Number Story
       </h2>
       <div className="bg-white rounded-2xl shadow-lg px-5 py-8 max-w-xl w-full flex flex-col items-center">
-        <div className="mb-4 font-semibold text-blue-700 text-lg">
-          Number choices:&nbsp;
-          {story.choices.map((num, i) => (
-            <span key={num} className="inline-block mx-1 px-2 py-1 bg-blue-100 rounded-full border">{num}</span>
-          ))}
-        </div>
-
+        {/* One-at-a-time word bank per blank: visually obvious and clear */}
         <div className="mb-8 text-lg text-gray-900">
           {story.textParts.map((part, idx) => (
-            <span key={idx}>
+            <span key={idx} style={{ display: 'inline-block', minWidth: 72 }}>
               {part}
               {idx < story.blanks.length && (
-                <input
-                  type="number"
-                  value={inputs[idx]}
-                  onChange={e => handleChange(idx, e.target.value)}
-                  className={`mx-2 px-2 py-1 rounded-md border-2 ${feedback[idx] === true
-                    ? "border-green-400 bg-green-50"
-                    : feedback[idx] === false
-                      ? "border-red-400 bg-red-50"
-                      : "border-gray-300 bg-gray-50"}`}
-                  style={{ width: 50 }}
-                  disabled={completed}
-                  aria-label={`blank ${idx + 1}`}
-                  min={Math.min(...story.choices)}
-                  max={Math.max(...story.choices)}
-                  list={`choices${currentStory}`}
-                />
+                <span className="inline-flex flex-col items-center mx-2">
+                  {/* Show visual "blank" as a box displaying selection, or empty if not chosen */}
+                  <span
+                    className={`block px-4 py-2 mb-1 rounded border-2 text-lg min-w-[40px] ${feedback[idx] === true
+                      ? "border-green-400 bg-green-100"
+                      : feedback[idx] === false
+                        ? "border-red-400 bg-red-100"
+                        : "border-gray-400 bg-gray-50"}`}
+                    style={{ minWidth: 42, textAlign: 'center' }}
+                    aria-label={`Answer blank ${idx + 1}`}
+                  >
+                    {inputs[idx] !== '' ? inputs[idx] : '\u00A0'}
+                  </span>
+                  {/* Choices as number buttons */}
+                  <div className="flex gap-1 justify-center">
+                    {story.choices.map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => selectChoiceForBlank(idx, String(num))}
+                        className={`px-2 py-1 rounded font-bold text-base border-2
+                          ${inputs[idx] === String(num)
+                            ? "border-blue-500 bg-blue-200 text-blue-800"
+                            : "border-gray-200 bg-gray-100 text-gray-700"}
+                          hover:bg-blue-300 hover:border-blue-700`}
+                        disabled={completed}
+                        aria-label={`Choose ${num} for blank ${idx + 1}`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </span>
               )}
             </span>
           ))}
-          {/* Datalist for easy touch/mobile pick */}
-          <datalist id={`choices${currentStory}`}>
-            {story.choices.map((num) => (
-              <option key={num} value={num} />
-            ))}
-          </datalist>
         </div>
 
         <button
