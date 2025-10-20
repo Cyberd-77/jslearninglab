@@ -1,54 +1,115 @@
 import React, { useState } from 'react';
 
+// Stories with labelled blanks.
 const stories = [
   {
-    textParts: ["Mom had ", " hot dogs. She gave away ", " to friends. Now she has ", " left."],
-    blanks: [5, 3, 2],
+    textParts: [
+      "Mom had ", " hot dogs. She gave away ", " to friends. Now she has ", " left."
+    ],
+    blanks: [
+      { answer: 5, label: "hot dogs at first" },
+      { answer: 3, label: "hot dogs given away" },
+      { answer: 2, label: "hot dogs left" }
+    ],
     choices: [2, 3, 5, 6]
   },
   {
-    textParts: ["There are ", " apples on the tree. If ", " fall down, how many are left? ", ""],
-    blanks: [10, 4, 6],
+    textParts: [
+      "There are ", " apples on the tree. If ", " fall down, how many are left? ", ""
+    ],
+    blanks: [
+      { answer: 10, label: "apples at first" },
+      { answer: 4, label: "apples that fell" },
+      { answer: 6, label: "apples left" }
+    ],
     choices: [4, 6, 8, 10]
   },
   {
-    textParts: ["Tom had ", " marbles. He won ", " more. Now he has ", " marbles in total."],
-    blanks: [7, 5, 12],
+    textParts: [
+      "Tom had ", " marbles. He won ", " more. Now he has ", " marbles in total."
+    ],
+    blanks: [
+      { answer: 7, label: "marbles at first" },
+      { answer: 5, label: "marbles won" },
+      { answer: 12, label: "total marbles" }
+    ],
     choices: [5, 7, 9, 12]
   },
   {
-    textParts: ["Jeremiah had ", " race cars. He lost ", ". How many does he still have? ", ""],
-    blanks: [8, 3, 5],
+    textParts: [
+      "Jeremiah had ", " race cars. He lost ", ". How many does he still have? ", ""
+    ],
+    blanks: [
+      { answer: 8, label: "race cars at first" },
+      { answer: 3, label: "race cars lost" },
+      { answer: 5, label: "race cars left" }
+    ],
     choices: [3, 5, 6, 8]
   },
   {
-    textParts: ["J picked ", " flowers for mom and then picked ", " more. Altogether, he picked ", " flowers."],
-    blanks: [6, 2, 8],
+    textParts: [
+      "J picked ", " flowers for mom and then picked ", " more. Altogether, he picked ", " flowers."
+    ],
+    blanks: [
+      { answer: 6, label: "flowers at first" },
+      { answer: 2, label: "flowers picked after" },
+      { answer: 8, label: "total flowers" }
+    ],
     choices: [2, 4, 6, 8]
   },
   {
-    textParts: ["A baker made ", " cookies. She gave away ", " cookies at school. How many remain? ", ""],
-    blanks: [12, 5, 7],
+    textParts: [
+      "A baker made ", " cookies. She gave away ", " cookies at school. How many remain? ", ""
+    ],
+    blanks: [
+      { answer: 12, label: "cookies made" },
+      { answer: 5, label: "cookies given away" },
+      { answer: 7, label: "cookies left" }
+    ],
     choices: [5, 7, 9, 12]
   },
   {
-    textParts: ["Jeremiah saw ", " birds outside. ", " flew away. Now there are ", " birds left."],
-    blanks: [9, 4, 5],
+    textParts: [
+      "Jeremiah saw ", " birds outside. ", " flew away. Now there are ", " birds left."
+    ],
+    blanks: [
+      { answer: 9, label: "birds seen" },
+      { answer: 4, label: "birds that flew" },
+      { answer: 5, label: "birds left" }
+    ],
     choices: [4, 5, 7, 9]
   },
   {
-    textParts: ["J has ", " pennies. He finds ", " more under the couch. How many does he have now? ", ""],
-    blanks: [3, 4, 7],
+    textParts: [
+      "J has ", " pennies. He finds ", " more under the couch. How many does he have now? ", ""
+    ],
+    blanks: [
+      { answer: 3, label: "pennies at first" },
+      { answer: 4, label: "pennies found" },
+      { answer: 7, label: "total pennies" }
+    ],
     choices: [3, 4, 6, 7]
   },
   {
-    textParts: ["A basket holds ", " oranges. If you eat ", " oranges, how many are left in the basket? ", ""],
-    blanks: [7, 2, 5],
+    textParts: [
+      "A basket holds ", " oranges. If you eat ", " oranges, how many are left in the basket? ", ""
+    ],
+    blanks: [
+      { answer: 7, label: "oranges at first" },
+      { answer: 2, label: "oranges eaten" },
+      { answer: 5, label: "oranges left" }
+    ],
     choices: [2, 5, 7, 9]
   },
   {
-    textParts: ["Jeremiah built ", " LEGO towers. He built ", " more the next day. In total, he built ", " towers."],
-    blanks: [2, 3, 5],
+    textParts: [
+      "Jeremiah built ", " LEGO towers. He built ", " more the next day. In total, he built ", " towers."
+    ],
+    blanks: [
+      { answer: 2, label: "LEGO towers at first" },
+      { answer: 3, label: "LEGO towers built after" },
+      { answer: 5, label: "total LEGO towers" }
+    ],
     choices: [2, 3, 4, 5]
   }
 ];
@@ -91,7 +152,7 @@ function FillTheBlankNumberStory({ selectedVoice }) {
   }
 
   function checkAnswers() {
-    const correctAnswers = stories[currentStory].blanks;
+    const correctAnswers = stories[currentStory].blanks.map(b => b.answer);
     let newFeedback = [];
     let correctCount = 0;
     for (let i = 0; i < correctAnswers.length; i++) {
@@ -137,26 +198,25 @@ function FillTheBlankNumberStory({ selectedVoice }) {
         Fill-the-Blank Number Story
       </h2>
       <div className="bg-white rounded-2xl shadow-lg px-5 py-8 max-w-xl w-full flex flex-col items-center">
-        {/* One-at-a-time word bank per blank: visually obvious and clear */}
         <div className="mb-8 text-lg text-gray-900">
           {story.textParts.map((part, idx) => (
             <span key={idx} style={{ display: 'inline-block', minWidth: 72 }}>
               {part}
               {idx < story.blanks.length && (
                 <span className="inline-flex flex-col items-center mx-2">
-                  {/* Show visual "blank" as a box displaying selection, or empty if not chosen */}
                   <span
-                    className={`block px-4 py-2 mb-1 rounded border-2 text-lg min-w-[40px] ${feedback[idx] === true
-                      ? "border-green-400 bg-green-100"
-                      : feedback[idx] === false
+                    className={`block px-4 py-2 mb-1 rounded border-2 text-lg min-w-[40px] ${
+                      feedback[idx] === true
+                        ? "border-green-400 bg-green-100"
+                        : feedback[idx] === false
                         ? "border-red-400 bg-red-100"
-                        : "border-gray-400 bg-gray-50"}`}
+                        : "border-gray-400 bg-gray-50"
+                    }`}
                     style={{ minWidth: 42, textAlign: 'center' }}
                     aria-label={`Answer blank ${idx + 1}`}
                   >
                     {inputs[idx] !== '' ? inputs[idx] : '\u00A0'}
                   </span>
-                  {/* Choices as number buttons */}
                   <div className="flex gap-1 justify-center">
                     {story.choices.map((num) => (
                       <button
@@ -175,6 +235,7 @@ function FillTheBlankNumberStory({ selectedVoice }) {
                       </button>
                     ))}
                   </div>
+                  <span className="text-xs text-gray-500 mt-1">{story.blanks[idx].label}</span>
                 </span>
               )}
             </span>
