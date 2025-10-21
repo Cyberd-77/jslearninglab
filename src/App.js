@@ -87,7 +87,7 @@ export default function App() {
     );
   }
 
-  // Week picker for spelling
+  // Week picker for spelling (only shown once per session)
   if (subject === 'spelling' && selectedWeekIdx === null) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.spelling} font-sans p-8`}>
@@ -152,7 +152,7 @@ export default function App() {
     );
   }
 
-  // Game screens
+  // Game screens—after finishing or exiting a spelling game, goes to mode picker for already-selected week
   return (
     <div className={`${backgroundColors[subject]} min-h-screen`}>
       <button
