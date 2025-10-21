@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { spellingWeeks } from './spellingWords';
+import SpellingBeeShowdown from './SpellingBeeShowdown';
 import SpellingGame from './SpellingGame';
 import MathModule from './MathModule';
 import ReadingModule from './ReadingModule';
@@ -6,6 +8,8 @@ import FindTheWordGame from './FindTheWordGame';
 
 export default function App() {
   const [subject, setSubject] = useState(null);
+  const [selectedWeekIdx, setSelectedWeekIdx] = useState(null);
+  const [spellingMode, setSpellingMode] = useState(null);
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState('Samantha');
 
@@ -13,9 +17,7 @@ export default function App() {
     const populateVoices = () => {
       const voicesList = window.speechSynthesis.getVoices();
       setVoices(voicesList);
-      const defaultVoice = voicesList.find(v =>
-        v.name === 'Samantha'
-      );
+      const defaultVoice = voicesList.find(v => v.name === 'Samantha');
       setSelectedVoice(defaultVoice ? defaultVoice.name : voicesList[0]?.name);
     };
     window.speechSynthesis.onvoiceschanged = populateVoices;
@@ -30,6 +32,7 @@ export default function App() {
     default: 'bg-gradient-to-br from-gray-500 to-gray-700'
   };
 
+  // Splash screen
   if (!subject) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.default} font-sans p-6`}>
@@ -84,16 +87,99 @@ export default function App() {
     );
   }
 
+  // Week picker for spelling
+  if (subject === 'spelling' && selectedWeekIdx === null) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.spelling} font-sans p-8`}>
+        <button
+          onClick={() => { setSubject(null); setSelectedWeekIdx(null); setSpellingMode(null); }}
+          className="absolute top-4 left-4 bg-white rounded-full px-4 py-2 font-bold shadow hover:bg-gray-200 transition z-10"
+        >
+          ← Back to Subjects
+        </button>
+        <h2 className="text-3xl font-extrabold mb-8 text-pink-900 drop-shadow text-center">
+          Pick Which Week’s Spelling Words!
+        </h2>
+        <div className="max-w-xl w-full flex flex-col gap-5 mb-6">
+          {spellingWeeks.map((week, idx) => (
+            <button
+              key={week.label}
+              onClick={() => setSelectedWeekIdx(idx)}
+              className="w-full bg-cyan-200 hover:bg-cyan-300 px-8 py-4 rounded-2xl font-bold text-2xl shadow transition text-pink-900"
+            >
+              {week.label}
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 text-gray-700 text-base">
+          Your words will be loaded from the week you select!
+        </div>
+      </div>
+    );
+  }
+
+  // Game Mode picker for this week's set
+  if (subject === 'spelling' && selectedWeekIdx !== null && !spellingMode) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.spelling} font-sans p-8`}>
+        <button
+          onClick={() => { setSelectedWeekIdx(null); setSpellingMode(null); }}
+          className="absolute top-4 left-4 bg-white rounded-full px-4 py-2 font-bold shadow hover:bg-gray-200 transition z-10"
+        >
+          ← Back to Week Select
+        </button>
+        <h2 className="text-3xl font-extrabold mb-8 text-purple-800 drop-shadow text-center">
+          Pick Your Spelling Game!
+        </h2>
+        <div className="max-w-xl w-full flex flex-col gap-5 mb-6">
+          <button
+            onClick={() => setSpellingMode('bee')}
+            className="w-full bg-yellow-300 hover:bg-yellow-400 px-8 py-4 rounded-2xl font-bold text-2xl shadow transition text-purple-900"
+          >
+            🦋 Spelling Bee Showdown
+          </button>
+          <button
+            onClick={() => setSpellingMode('testprep')}
+            className="w-full bg-blue-200 hover:bg-blue-300 px-8 py-4 rounded-2xl font-bold text-lg shadow transition text-blue-900"
+          >
+            🚀 TestPrep Crash (Classic Study/Test mode)
+          </button>
+        </div>
+        <div className="mt-6 text-gray-700 text-base text-center">
+          Your chosen week’s words will be used for every game!
+        </div>
+      </div>
+    );
+  }
+
+  // Game screens
   return (
     <div className={`${backgroundColors[subject]} min-h-screen`}>
       <button
-        onClick={() => setSubject(null)}
+        onClick={() => {
+          setSubject(null);
+          setSelectedWeekIdx(null);
+          setSpellingMode(null);
+        }}
         className="absolute top-4 left-4 bg-white rounded-full px-4 py-2 font-bold shadow hover:bg-gray-200 transition z-10"
       >
         ← Back to Subjects
       </button>
 
-      {subject === 'spelling' && <SpellingGame selectedVoice={selectedVoice} />}
+      {subject === 'spelling' && spellingMode === 'bee' && (
+        <SpellingBeeShowdown
+          wordSet={spellingWeeks[selectedWeekIdx].words}
+          selectedVoice={selectedVoice}
+          onExit={() => setSpellingMode(null)}
+        />
+      )}
+      {subject === 'spelling' && spellingMode === 'testprep' && (
+        <SpellingGame
+          wordSet={spellingWeeks[selectedWeekIdx].words}
+          selectedVoice={selectedVoice}
+          onExit={() => setSpellingMode(null)}
+        />
+      )}
       {subject === 'math' && <MathModule selectedVoice={selectedVoice} />}
       {subject === 'reading' && <ReadingModule selectedVoice={selectedVoice} />}
       {subject === 'findword' && <FindTheWordGame selectedVoice={selectedVoice} />}
