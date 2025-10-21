@@ -2,6 +2,7 @@
 export const spellingWeeks = [
   {
     label: "Current Week",
+    testDate: "10/24/2025",
     words: [
       { root: "smile", suffix: "ing", full: "smiling", hint: "s____g", sentence: "She was smiling all day at the finish line!" },
       { root: "race", suffix: "ing", full: "racing", hint: "r____g", sentence: "The cars are racing super fast!" },
@@ -17,6 +18,7 @@ export const spellingWeeks = [
   },
   {
     label: "Last Week",
+    testDate: "10/17/2025",
     words: [
       { root: "yell", suffix: "ed", full: "yelled", hint: "y___d", sentence: "He yelled for help in the park." },
       { root: "yank", suffix: "ed", full: "yanked", hint: "y____d", sentence: "She yanked her backpack off the hook." },

@@ -6,6 +6,17 @@ import MathModule from './MathModule';
 import ReadingModule from './ReadingModule';
 import FindTheWordGame from './FindTheWordGame';
 
+// Pick nearest future or latest week as 'current'
+function getCurrentWeekIdx() {
+  const today = new Date();
+  let idx = 0;
+  spellingWeeks.forEach((w, i) => {
+    const testDate = new Date(w.testDate);
+    if (testDate >= today) idx = i;
+  });
+  return idx;
+}
+
 export default function App() {
   const [subject, setSubject] = useState(null);
   const [selectedWeekIdx, setSelectedWeekIdx] = useState(null);
@@ -32,63 +43,88 @@ export default function App() {
     default: 'bg-gradient-to-br from-gray-500 to-gray-700'
   };
 
-  // Splash screen
+  // SPLASH SCREEN SECTION
   if (!subject) {
     return (
-      <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.default} font-sans p-6`}>
-        <h1 className="text-white text-4xl md:text-5xl font-extrabold mb-8 md:mb-12 drop-shadow text-center">
-          Jslearning Lab
-        </h1>
-        <p className="text-white mb-3 text-lg text-center">
-          Choose your preferred voice:
-        </p>
-        <select
-          className="mb-8 rounded-lg px-2 py-2 border-2 border-cyan-500 bg-white text-cyan-900 w-full max-w-xs mx-auto"
-          value={selectedVoice}
-          onChange={e => setSelectedVoice(e.target.value)}
-          aria-label="Select voice"
-        >
-          {voices.map(v =>
-            <option key={v.name} value={v.name}>
-              {v.name}
-            </option>
-          )}
-        </select>
-        <p className="text-white mb-6 text-lg text-center">
-          Choose a subject to begin learning:
-        </p>
-        <div className="flex flex-col gap-6 items-center w-full max-w-xs mx-auto md:flex-row md:max-w-none md:gap-8 md:justify-center">
+      <div className="relative min-h-screen flex flex-col items-center justify-center font-sans overflow-hidden bg-gradient-to-br from-cyan-400 via-fuchsia-300 to-yellow-200">
+        {/* Animated bubble */}
+        <div className="absolute top-[-120px] left-[-120px] w-[350px] h-[350px] bg-pink-400 bg-opacity-20 blur-2xl rounded-full animate-bounce-slow z-0"></div>
+        <div className="absolute bottom-[-80px] right-[-100px] w-[250px] h-[250px] bg-cyan-400 bg-opacity-20 blur-2xl rounded-full animate-pulse z-0"></div>
+        <div className="absolute top-[100px] right-[-60px] w-[180px] h-[180px] bg-yellow-200 bg-opacity-20 blur-2xl rounded-full animate-ping z-0"></div>
+        {/* Mascot */}
+        <div className="z-10 mb-2 flex flex-col items-center select-none">
+          <span className="inline-block w-[90px] h-[90px] rounded-lg bg-yellow-400 border-[7px] border-gray-900 mb-2 shadow-lg" style={{
+            boxShadow: '0px 6px 26px 0 rgb(197 144 8 / 40%)'
+          }}>
+            <span className="block w-full text-center mt-1 text-[54px] drop-shadow-lg">🟥</span>
+          </span>
+          <span className="text-white text-5xl sm:text-6xl font-black drop-shadow-glow-warm tracking-tight mb-4">
+            J's <span className="text-yellow-300">Roblox</span> Learning Lab!
+          </span>
+          <span className="text-fuchsia-800 font-bold italic mb-3 animate-pulse">
+            Level up your brain. Build your skills. WIN prizes!
+          </span>
+        </div>
+        {/* Voice selector */}
+        <div className="z-10 bg-white bg-opacity-50 rounded-2xl px-8 py-6 mt-3 drop-shadow-xl flex flex-col items-center border-[3px] border-blue-200">
+          <p className="text-xl font-semibold mb-2 text-blue-800">Choose your speaking voice:</p>
+          <select
+            className="mb-2 rounded-lg px-4 py-2 border-2 border-yellow-400 bg-white text-blue-900 w-64 font-bold focus:ring-4 focus:ring-pink-300 text-lg"
+            value={selectedVoice}
+            onChange={e => setSelectedVoice(e.target.value)}
+            aria-label="Select voice"
+          >
+            {voices.map(v =>
+              <option key={v.name} value={v.name}>{v.name}</option>
+            )}
+          </select>
+        </div>
+        {/* Subject Buttons */}
+        <div className="z-10 flex flex-col gap-7 items-center mt-10 w-full max-w-lg animate-fadein">
           <button
             onClick={() => setSubject('spelling')}
-            className="bg-pink-400 hover:bg-pink-600 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
+            className="w-full flex items-center justify-center gap-4 bg-gradient-to-r from-yellow-300 via-pink-200 to-fuchsia-200 hover:bg-gradient-to-tr hover:from-yellow-400 hover:to-fuchsia-300 transition-all shadow-2xl px-10 py-6 rounded-[20px] font-extrabold text-3xl text-fuchsia-900 border-4 border-white hover:scale-105 duration-300 ease-in animate-bounce hover:animate-none"
           >
-            📝 Spelling
+            <span>📝🟩</span> Spelling
           </button>
           <button
             onClick={() => setSubject('math')}
-            className="bg-blue-400 hover:bg-blue-600 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
+            className="w-full flex items-center justify-center gap-4 bg-gradient-to-r from-blue-300 via-cyan-200 to-green-200 hover:bg-gradient-to-tr hover:from-blue-400 hover:to-green-200 transition-all shadow-2xl px-9 py-6 rounded-[20px] font-extrabold text-3xl text-blue-900 border-4 border-white hover:scale-105 duration-300 ease-in"
           >
-            🔢 Math
+            <span>🧮🟥</span> Math
           </button>
           <button
             onClick={() => setSubject('reading')}
-            className="bg-green-500 hover:bg-green-700 text-white rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
+            className="w-full flex items-center justify-center gap-4 bg-gradient-to-r from-green-300 via-yellow-200 to-lime-200 hover:bg-gradient-to-tr hover:from-green-400 hover:to-yellow-200 transition-all shadow-2xl px-9 py-6 rounded-[20px] font-extrabold text-3xl text-green-900 border-4 border-white hover:scale-105 duration-300 ease-in"
           >
-            📚 Reading
+            <span>📚🟦</span> Reading
           </button>
           <button
             onClick={() => setSubject('findword')}
-            className="bg-yellow-300 hover:bg-yellow-400 text-green-800 rounded-full px-8 py-4 text-2xl font-bold shadow-lg transition w-full md:w-auto"
+            className="w-full flex items-center justify-center gap-4 bg-gradient-to-r from-yellow-200 via-blue-100 to-orange-100 hover:bg-gradient-to-tr hover:from-blue-200 hover:to-yellow-200 transition-all shadow-2xl px-9 py-6 rounded-[20px] font-extrabold text-3xl text-yellow-900 border-4 border-white hover:scale-105 duration-300 ease-in"
           >
-            👀 Find the Word
+            <span>🔎🟫</span> Find the Word
           </button>
         </div>
+        {/* Footer */}
+        <div className="z-10 mt-14 text-fuchsia-800 text-lg font-extrabold opacity-80 drop-shadow-md animate-bounce-slow">
+          Ready, J? Pick a subject to start your Roblox adventure!
+        </div>
+        <style>
+          {`
+          .animate-bounce-slow { animation: bounce 2.8s infinite cubic-bezier(.85, .5, .35, 1.2);}
+          .drop-shadow-glow-warm { filter: drop-shadow(0px 4px 14px rgba(236, 72, 153, 0.30)); }
+          .animate-fadein { animation: fadeIn .8s 0.1s cubic-bezier(.6,.9,.32,.99) both; }
+          @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1;transform:translateY(0); } }
+          `}
+        </style>
       </div>
     );
   }
 
-  // Week picker for spelling (only shown once per session)
+  // SPELLING WEEK PICKER
   if (subject === 'spelling' && selectedWeekIdx === null) {
+    const currentIdx = getCurrentWeekIdx();
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.spelling} font-sans p-8`}>
         <button
@@ -97,28 +133,33 @@ export default function App() {
         >
           ← Back to Subjects
         </button>
-        <h2 className="text-3xl font-extrabold mb-8 text-pink-900 drop-shadow text-center">
-          Pick Which Week’s Spelling Words!
+        <h2 className="text-3xl font-extrabold mb-6 text-pink-900 drop-shadow text-center">
+          Pick Your Spelling Week!
         </h2>
-        <div className="max-w-xl w-full flex flex-col gap-5 mb-6">
-          {spellingWeeks.map((week, idx) => (
-            <button
-              key={week.label}
-              onClick={() => setSelectedWeekIdx(idx)}
-              className="w-full bg-cyan-200 hover:bg-cyan-300 px-8 py-4 rounded-2xl font-bold text-2xl shadow transition text-pink-900"
-            >
-              {week.label}
-            </button>
-          ))}
+        <div className="w-full max-w-md mx-auto border-0 rounded-2xl bg-white bg-opacity-40 shadow-lg p-2">
+          <div className="overflow-y-auto" style={{ maxHeight: "350px" }}>
+            {spellingWeeks.map((week, idx) => (
+              <button
+                key={week.label + week.testDate}
+                onClick={() => setSelectedWeekIdx(idx)}
+                className={`w-full px-2 py-3 mb-2 rounded-xl font-bold text-lg flex flex-col items-start shadow transition border-2
+                  ${idx === currentIdx ? 'border-yellow-500 bg-yellow-200 text-pink-900' 
+                    : idx === 0 ? 'border-blue-400 bg-blue-100 text-blue-900' 
+                    : 'border-gray-300 bg-white text-gray-900'}
+                  hover:bg-cyan-100`}
+              >
+                <span className="font-bold">{week.label}</span>
+                <span className="text-xs text-gray-500">Test date: {week.testDate || 'TBA'}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="mt-6 text-gray-700 text-base">
-          Your words will be loaded from the week you select!
-        </div>
+        <div className="mt-6 text-gray-700 text-base text-center">Scroll to find your week. The current week's words are highlighted!</div>
       </div>
     );
   }
 
-  // Game Mode picker for this week's set
+  // SPELLING GAME MODE PICKER
   if (subject === 'spelling' && selectedWeekIdx !== null && !spellingMode) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center ${backgroundColors.spelling} font-sans p-8`}>
@@ -152,7 +193,7 @@ export default function App() {
     );
   }
 
-  // Game screens—after finishing or exiting a spelling game, goes to mode picker for already-selected week
+  // GAME SCREENS AND MAIN NAVIGATION
   return (
     <div className={`${backgroundColors[subject]} min-h-screen`}>
       <button
@@ -165,7 +206,6 @@ export default function App() {
       >
         ← Back to Subjects
       </button>
-
       {subject === 'spelling' && spellingMode === 'bee' && (
         <SpellingBeeShowdown
           wordSet={spellingWeeks[selectedWeekIdx].words}

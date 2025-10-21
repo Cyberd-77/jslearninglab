@@ -1,109 +1,129 @@
 import React, { useState, useEffect } from 'react';
+import { masterWordList } from './masterWordsList';
 
-// Use your comprehensive master word list (paste your full array here)
-const masterWordList = [
-  "this", "here", "find", "me", "that", "no", "work", "come", "how", "help", "day", "what", "down", "case", "ever", "two", "same", "said", "new", "an", "baseball", "factory", "learned", "felt", "sold", "midnight", "party", "below", "horn", "rush", "ground", "fixed", "idea", "ring", "east", "sand", "thanks", "deck", "receiving", "half", "building", "plant", "desk", "alone", "worn", "mean", "week", "sleep", "grip", "draw", "repeat", "pat", "motion", "bed", "rest", "pair", "black", "trip", "gate", "trap", "opening", "ready", "having", "try", "raise", "trade", "paint", "everything", "goods", "pack", "sight", "root", "behind", "height", "lips", "blood", "memory", "sudden", "perform", "river", "air", "hole", "mine", "bag", "powerful", "afternoon", "beauty", "clock", "envelope", "sale", "friend", "sky", "free", "date", "smile", "meaning", "park", "sink", "needs", "sum", "kept", "cap", "hard", "fishing", "hill", "tonight", "hidden", "perhaps", "dog", "speaker", "arrive", "ladies", "wild", "buy", "track", "chair", "sister", "human", "inch", "split", "loves", "pound", "cream", "row", "partner", "slip", "winning", "football", "fool", "kitchen", "all", "number", "same", "how", "one", "case", "get", "find", "just", "with", "still", "had", "the", "why", "over", "against", "we", "never", "to", "back", "book", "favor", "net", "split", "complete", "crowd", "hung", "baseball", "funny", "soft", "terrible", "double", "addition", "pocket", "drop", "march", "receive", "warning", "shadow", "empty", "desk", "shot", "kind", "darkness", "calendar", "pick", "city", "hall", "tiny", "solve", "chest", "fight", "silver", "thanks", "went", "snow", "bag", "mail", "pink", "write", "married", "motor", "bent", "able", "blind", "gift", "size", "build", "wooden", "wall", "inch", "trade", "sweet", "color", "pilot", "award", "dog", "musical", "change", "top", "deep", "silence", "wake", "worn", "eight", "air", "load", "harm", "page", "coffee", "tie", "lane", "chicken", "happen", "ahead", "act", "alive", "large", "body", "mixture", "forward", "winning", "plane", "mile", "wife", "acting", "fire", "solid", "ball", "breakfast", "sound", "yourself", "stretch", "anger", "coat", "hat", "mystery", "husband", "sing", "born", "milk", "envelope", "highway", "anything", "strong", "throw", "match", "seeing", "grow", "save"
-];
-
-function getRandomWords(wordList, count) {
-  const copy = [...wordList];
-  const arr = [];
-  while (arr.length < count && copy.length > 0) {
-    const idx = Math.floor(Math.random() * copy.length);
-    arr.push(copy.splice(idx, 1)[0]);
+function getRandomOptions(target, words, n) {
+  const filtered = words.filter(w => w !== target);
+  const options = [target];
+  while (options.length < n) {
+    const rand = filtered[Math.floor(Math.random() * filtered.length)];
+    if (!options.includes(rand)) options.push(rand);
   }
-  return arr;
+  // Shuffle
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+  return options;
 }
 
-function FindTheWordGame({ selectedVoice, gridSize = 4 }) {
-  const [gridWords, setGridWords] = useState([]);
-  const [answer, setAnswer] = useState('');
+export default function FindTheWordGame({ selectedVoice, onExit }) {
+  const roundCount = 8;
+  const questionWords = [...masterWordList]
+    .sort(() => 0.5 - Math.random())
+    .slice(0, roundCount);
+  const questions = questionWords.map(word => ({
+    target: word,
+    options: getRandomOptions(word, masterWordList, 4)
+  }));
+
+  const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [message, setMessage] = useState('');
-  const [tries, setTries] = useState(0);
+  const [shuffledOptions, setShuffledOptions] = useState([]);
 
-  // move resetGrid above useEffect
-  function resetGrid() {
-    const chosen = getRandomWords(masterWordList, gridSize * gridSize);
-    setGridWords(chosen);
-    const answerIdx = Math.floor(Math.random() * chosen.length);
-    setAnswer(chosen[answerIdx]);
-    setMessage('');
-    setTries(0);
-  }
-
-  // Only reset grid on mount or gridSize change
   useEffect(() => {
-    resetGrid();
+    setShuffledOptions(questions[current].options);
+    // Auto-speak target word (Minecraft style)
+    const word = questions[current].target;
+    if ('speechSynthesis' in window) {
+      const utter = new window.SpeechSynthesisUtterance(word);
+      const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    }
     // eslint-disable-next-line
-  }, [gridSize]);
+  }, [current, selectedVoice]);
 
   function speakWord(word) {
     if ('speechSynthesis' in window) {
       const utter = new window.SpeechSynthesisUtterance(word);
       const voice = window.speechSynthesis.getVoices().find(v => v.name === selectedVoice);
       if (voice) utter.voice = voice;
+      window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utter);
     }
   }
 
-  function check(clickedWord) {
-    if (clickedWord === answer) {
-      setMessage(`✅ Correct! Score: ${score + 1}`);
-      setScore(s => s + 1);
+  function handleOptionClick(option) {
+    if (
+      option.trim().toLowerCase() === questions[current].target.trim().toLowerCase()
+    ) {
+      setMessage("✅ Great job, Steve!");
+      setScore(score + 1);
       setTimeout(() => {
-        resetGrid();
-      }, 1500);
+        if (current < questions.length - 1) {
+          setMessage('');
+          setCurrent(current + 1);
+        } else {
+          setMessage("🏆 You finished all the blocks!");
+        }
+      }, 1200);
     } else {
-      setMessage('❌ Try again!');
-      setTries(t => t + 1);
+      setMessage("☠️ Creeper says: Try again!");
     }
   }
 
+  function handleHearWord() {
+    speakWord(questions[current].target);
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-green-100 to-yellow-100 font-sans">
-      <h2 className="text-3xl md:text-4xl font-extrabold mb-6 text-blue-800 drop-shadow text-center">
-        Find the Word Game
-      </h2>
-      <div className="bg-white rounded-2xl shadow-xl px-6 py-8 max-w-lg w-full flex flex-col items-center">
-        <p className="mb-4 text-lg font-bold">Listen and tap/click the matching word:</p>
+    <div className="relative min-h-screen flex flex-col items-center justify-center font-sans overflow-hidden">
+      {/* Minecraft-style layers */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="h-2/5 bg-gradient-to-b from-blue-300 to-blue-100 w-full"></div>
+        <div className="h-[60px] bg-gradient-to-b from-green-400 to-green-600 w-full" style={{borderBottom: '14px solid #A0522D'}}></div>
+        <div className="h-[120px] bg-yellow-900 w-full"></div>
+      </div>
+      {/* Block-style emoji accents */}
+      <div className="absolute left-16 top-40 text-5xl pointer-events-none select-none">🟩</div>
+      <div className="absolute right-20 bottom-40 text-5xl pointer-events-none select-none">🟫</div>
+      <div className="absolute left-[45%] top-10 text-[38px] pointer-events-none select-none">🧑‍🌾</div>
+      <div className="absolute right-[23%] top-28 text-[38px] pointer-events-none select-none">💚</div>
+      <div className="bg-white bg-opacity-90 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center z-10 border-[6px] border-green-600">
+        <h2 className="text-3xl font-extrabold text-green-700 mb-2 drop-shadow flex flex-row gap-2 items-center justify-center">👾 Find the Word! <span className="text-2xl">🟩</span></h2>
+        <h3 className="text-xl font-bold mb-6 text-yellow-900 flex flex-row gap-1 items-center justify-center">Which block has the word you heard?</h3>
         <button
-          onClick={() => speakWord(answer)}
-          className="mb-6 bg-blue-500 hover:bg-blue-700 text-white rounded-full px-8 py-3 font-black shadow text-2xl"
+          onClick={handleHearWord}
+          className="bg-gradient-to-r from-green-400 via-lime-400 to-yellow-500 hover:from-green-500 hover:to-yellow-400 text-white font-black rounded-full px-8 py-3 shadow-lg mb-6 transition hover:scale-105"
         >
-          Hear Word
+          🔊 Hear Word Again
         </button>
-        <div
-          className="grid mb-8 gap-4"
-          style={{
-            gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
-            width: '100%',
-          }}
-        >
-          {gridWords.map((word, i) => (
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {shuffledOptions.map((option) => (
             <button
-              key={word + i}
-              onClick={() => check(word)}
-              className="bg-gray-100 hover:bg-green-200 text-gray-900 rounded-xl shadow px-4 py-3 text-xl font-bold transition border-2 border-blue-200"
-              style={{ minWidth: '5em' }}
+              key={option}
+              onClick={() => handleOptionClick(option)}
+              className="bg-gradient-to-br from-green-300 via-yellow-200 to-lime-200 hover:from-green-400 hover:to-yellow-300 px-6 py-3 rounded-xl text-xl font-extrabold shadow-lg border-4 border-yellow-600 transition-all hover:scale-105"
             >
-              {word}
+              {option}
             </button>
           ))}
         </div>
-        <div className="text-lg min-h-2.2em font-bold text-green-700">{message}</div>
-        <div className="mt-6 text-blue-500 text-base text-center">
-          Score: {score} | Tries: {tries}
+        <div className={`mt-3 font-black text-2xl ${message.includes('Great') || message.includes('block') ? 'text-green-700' : 'text-red-700'}`}>
+          {message}
+        </div>
+        <div className="mt-6 font-black text-lg text-yellow-900 bg-gradient-to-r from-yellow-300 via-green-200 to-lime-100 px-4 py-2 rounded-full shadow-inner">
+          Score: {score} / {questions.length}
         </div>
         <button
-          onClick={() => { setScore(0); resetGrid(); }}
-          className="mt-6 bg-purple-400 hover:bg-purple-700 text-white px-6 py-2 rounded-full font-bold shadow"
+          onClick={onExit}
+          className="mt-6 bg-yellow-400 hover:bg-green-400 px-6 py-2 rounded-full text-white font-bold shadow-lg border-2 border-yellow-800 transition"
         >
-          Restart Game
+          ← Back to Game Menu
         </button>
       </div>
     </div>
   );
 }
-
-export default FindTheWordGame;
